@@ -1,0 +1,30 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="Errors\**" />
+    <Compile Remove="Matchmaker\**" />
+    <Content Remove="Errors\**" />
+    <Content Remove="Matchmaker\**" />
+    <EmbeddedResource Remove="Errors\**" />
+    <EmbeddedResource Remove="Matchmaker\**" />
+    <None Remove="Errors\**" />
+    <None Remove="Matchmaker\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="5.0.1" NoWarn="NU1605" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="5.0.1" NoWarn="NU1605" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="5.6.3" />
+    <PackageReference Include="MassTransit.AspNetCore" Version="7.1.0" />
+    <PackageReference Include="MassTransit.RabbitMQ" Version="7.1.8" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Colyseus.Common\Colyseus.Common.csproj" />
+  </ItemGroup>
+
+</Project>

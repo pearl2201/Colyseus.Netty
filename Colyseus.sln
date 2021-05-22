@@ -1,0 +1,61 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30804.86
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Colyseus.Api", "Colyseus.Server\Colyseus.Api.csproj", "{E08D711D-9BE1-4BFA-91B7-C141F36AC857}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Colyseus.Common", "Colyseus.Common\Colyseus.Common.csproj", "{3CDC3E23-B49B-4643-909B-8E8964E25654}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FossilDelta", "FossilDelta\FossilDelta.csproj", "{A60DCAE6-62BB-4C70-93E1-6794A6DAA899}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GameDevWare.Serialization", "GameDevWare.Serialization\GameDevWare.Serialization.csproj", "{637735B7-F19F-49D8-9FF3-DDCFE37E45B7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Colyseus.SocketServer", "Colyseus.SocketServer\Colyseus.SocketServer.csproj", "{8FD34459-C625-44E6-9DB4-ECA299807F7B}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Colyseus.NettyServer", "Colyseus.NettyServer\Colyseus.NettyServer.csproj", "{51388531-60D9-4411-B5D4-5F268D27648D}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Coleseus.Shared", "Coleseus.Shared\Coleseus.Shared.csproj", "{728B95C2-5B14-4885-9A57-D9A77500ACA1}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{E08D711D-9BE1-4BFA-91B7-C141F36AC857}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E08D711D-9BE1-4BFA-91B7-C141F36AC857}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E08D711D-9BE1-4BFA-91B7-C141F36AC857}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E08D711D-9BE1-4BFA-91B7-C141F36AC857}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3CDC3E23-B49B-4643-909B-8E8964E25654}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3CDC3E23-B49B-4643-909B-8E8964E25654}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3CDC3E23-B49B-4643-909B-8E8964E25654}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3CDC3E23-B49B-4643-909B-8E8964E25654}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A60DCAE6-62BB-4C70-93E1-6794A6DAA899}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A60DCAE6-62BB-4C70-93E1-6794A6DAA899}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A60DCAE6-62BB-4C70-93E1-6794A6DAA899}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A60DCAE6-62BB-4C70-93E1-6794A6DAA899}.Release|Any CPU.Build.0 = Release|Any CPU
+		{637735B7-F19F-49D8-9FF3-DDCFE37E45B7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{637735B7-F19F-49D8-9FF3-DDCFE37E45B7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{637735B7-F19F-49D8-9FF3-DDCFE37E45B7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{637735B7-F19F-49D8-9FF3-DDCFE37E45B7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8FD34459-C625-44E6-9DB4-ECA299807F7B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8FD34459-C625-44E6-9DB4-ECA299807F7B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8FD34459-C625-44E6-9DB4-ECA299807F7B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8FD34459-C625-44E6-9DB4-ECA299807F7B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{51388531-60D9-4411-B5D4-5F268D27648D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{51388531-60D9-4411-B5D4-5F268D27648D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{51388531-60D9-4411-B5D4-5F268D27648D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{51388531-60D9-4411-B5D4-5F268D27648D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{728B95C2-5B14-4885-9A57-D9A77500ACA1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{728B95C2-5B14-4885-9A57-D9A77500ACA1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{728B95C2-5B14-4885-9A57-D9A77500ACA1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{728B95C2-5B14-4885-9A57-D9A77500ACA1}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {3B6BBB74-7FD3-40D0-A46B-638BCEA09A6A}
+	EndGlobalSection
+EndGlobal
