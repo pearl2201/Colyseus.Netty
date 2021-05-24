@@ -1,11 +1,15 @@
-﻿using Colyseus.Server.Transport;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Colyseus.Server.Transport;
 
 namespace Colyseus.Server
 {
+    interface IBroadcastOptions : ISendOptions
+    {
+        Client? except { get; }
+    }
 
     public abstract class Room<TState, TMetadata> : IDisposable
     {
@@ -13,11 +17,10 @@ namespace Colyseus.Server
         private const float DEFAULT_SIMULATION_INTERVAL = 1000f / 60; // 60fps (16.66ms)
 
         public const float DEFAULT_SEAT_RESERVATION_TIME = 15;
-
+        protected float seatReservationTime = DEFAULT_SEAT_RESERVATION_TIME;
         //public const Type SimulationCallback = Action<float>;
 
         //public const Type RoomConstructor<T> = Func<Presence?, Room<T>> where T: class;
-
 
         public string roomId;
         public string roomName;
@@ -47,7 +50,7 @@ namespace Colyseus.Server
 
         public abstract Task<dynamic> OnLeave(Client client, bool consented);
 
-        public virtual Task<dynamic> OnAuth(Client client, dynamic options, HttpRequest httpIncommingMessage)
+        public virtual Task<dynamic> OnAuth(Client client, dynamic options, dynamic httpIncommingMessage)
         {
             return Task.Run(() => { return (dynamic)true; });
         }
@@ -96,111 +99,112 @@ namespace Colyseus.Server
         {
 
         }
-        public async unlock()
+        public async Task unlock() { }
+        public void send(Client client, string type, dynamic message, ISendOptions? options)
         {
+
         }
-        public send(client: Client, type: string | number, message: any, options?: ISendOptions) : void;
-  public send(client: Client, message: Schema, options?: ISendOptions) : void;
-  public send(client: Client, messageOrType: any, messageOrOptions?: any | ISendOptions, options?: ISendOptions) : void {
+        public void send(Client client, Schema.Schema message, ISendOptions? options)
+        {
 
-            }
+        }
 
-    public broadcast(type: string | number, message?: any, options?: IBroadcastOptions);
-    public broadcast<T extends Schema>(message: T, options?: IBroadcastOptions);
-  public broadcast(
-    typeOrSchema: string | number | Schema,
-    messageOrOptions?: any | IBroadcastOptions,
-    options?: IBroadcastOptions,
-  )
-    {
+        private void broadcast(string type, dynamic message, IBroadcastOptions? options)
+        {
 
+        }
+        private void broadcast<T>(T message, IBroadcastOptions? options) where T : Schema.Schema
+        {
+
+        }
+
+        public void onMessage<T>(string messageType, Action<dynamic[]> callback)
+        {
+
+        }
+
+        public async Task disconnect()
+        {
+
+        }
+
+        public async Task _onJoin(Client client, dynamic req)
+        {
+
+        }
+
+        public void allowReconnection(Client previousClient, float seconds = float.MaxValue)
+        {
+
+        }
+
+        protected void resetAutoDisposeTimeout(float timeoutInSeconds = 1)
+        {
+
+        }
+
+        private void broadcastMessageSchema<T>(T message, IBroadcastOptions options) where T : Schema.Schema
+        {
+
+        }
+
+        private void broadcastMessageType(dynamic type, dynamic message, IBroadcastOptions options)
+        {
+
+        }
+
+        private void sendFullState(Client client)
+        {
+
+        }
+
+        private void broadcastAfterPatch()
+        {
+
+        }
+
+        private async Task _reserveSeat(
+          string sessionId,
+          bool joinOptions = true,
+          float seconds = DEFAULT_SEAT_RESERVATION_TIME,
+          bool allowReconnection = false)
+        {
+
+        }
+
+        private void _disposeIfEmpty()
+        {
+
+        }
+
+        private async Task _dispose()
+        {
+
+        }
+
+        private void _onMessage(Client client, byte[] bytes)
+        {
+
+        }
+
+        private void _forciblyCloseClient(Client client, int? closeCode)
+        {
+
+        }
+
+        private async Task<dynamic> _onLeave(Client client, int? code)
+        {
+            return null;
+        }
+
+        private async Task _incrementClientCount()
+        {
+
+        }
+
+        private async Task _decrementClientCount()
+        {
+
+        }
     }
-
-    public onMessage<T = any>(messageType: '*', callback: (client: Client, type: string | number, message: T) => void);
-  public onMessage<T = any>(messageType: string | number, callback: (client: Client, message: T) => void);
-  public onMessage<T = any>(messageType: '*' | string | number, callback: (...args: any[]) => void) {
-
-        }
-
-public async disconnect(): Promise<any> {
-
-}
-
-
-public async ['_onJoin'] (client: Client, req ?: http.IncomingMessage) {
-
-}
-
-public allowReconnection(previousClient: Client, seconds: number = Infinity): Deferred
-{
-
-}
-
-protected resetAutoDisposeTimeout(timeoutInSeconds: number = 1) {
-
-}
-
-private broadcastMessageSchema<T extends Schema>(message: T, options: IBroadcastOptions = { }) {
-
-}
-
-private broadcastMessageType(type: string, message ?: any, options: IBroadcastOptions = { }) {
-
-}
-
-private sendFullState(client: Client): void
-{
-
-}
-
-private broadcastAfterPatch()
-{
-
-}
-
-private async _reserveSeat(
-  sessionId: string,
-    joinOptions: any = true,
-    seconds: number = this.seatReservationTime,
-    allowReconnection: boolean = false,
-  ) {
-
-}
-
-
-private _disposeIfEmpty()
-{
-
-}
-
-
-private async _dispose(): Promise<any> {
-
-}
-
-
-private _onMessage(client: Client, bytes: number[]) {
-
-}
-
-private _forciblyCloseClient(client: Client, closeCode: number) {
-
-}
-
-private async _onLeave(client: Client, code ?: number): Promise<any> {
-
-}
-
-
-private async _incrementClientCount()
-{
-
-}
-
-
-private async _decrementClientCount()
-{
-
-}
-}
 }
