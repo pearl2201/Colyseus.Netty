@@ -38,7 +38,11 @@ namespace Colyseus.Common {
             byte[] decodedData = rawData;
             if (verify) {
 
+<<<<<<< HEAD
                 output.Add (new ColyseusMessage () { Cmd = cmd, Version = version, Len = len, RawData = decodedData });
+=======
+                output.Add (new ColyseusMessage () { Cmd = cmd, Version = version, Len = len, RawData = rawData });
+>>>>>>> 40b1c90824edfea1c764b751e0a46fdb0a7d1df1
             }
         }
 

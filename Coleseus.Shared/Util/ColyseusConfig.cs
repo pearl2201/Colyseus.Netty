@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+<<<<<<< HEAD
 public class ColyseusConfig
 {
     public const string NODE_NAME = "NadNode";
@@ -22,4 +23,16 @@ public class ColyseusConfig
 	 * closing session.
 	 */
     public const int DEFAULT_RECONNECT_DELAY = 5 * 60 * 1000;
+=======
+public class ColyseusConfig 
+{
+	public static const String NODE_NAME = "NadNode";
+	public static const String RECONNECT_KEY = "RECONNECT_KEY";
+	public static const String RECONNECT_REGISTRY = "RECONNECT_REGISTRY";
+	/**
+	 * By default wait for 5 minutes for remote client to reconnect, before
+	 * closing session.
+	 */
+	public static const int DEFAULT_RECONNECT_DELAY =  5 * 60 * 1000;
+>>>>>>> 40b1c90824edfea1c764b751e0a46fdb0a7d1df1
 }

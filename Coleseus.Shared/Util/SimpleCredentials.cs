@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+<<<<<<< HEAD
 public class SimpleCredentials : Credentials
 {
     private  string username;
@@ -46,4 +47,40 @@ public class SimpleCredentials : Credentials
     {
         return username;
     }
+=======
+public class SimpleCredentials implements Credentials
+{
+	private final String username;
+	private final String password;
+	
+	public SimpleCredentials(String username, String password)
+	{
+		this.username = username;
+		this.password = password;
+	}
+	
+	public SimpleCredentials(ByteBuf buffer)
+	{
+		this.username = NettyUtils.readString(buffer);
+		this.password = NettyUtils.readString(buffer);
+	}
+
+	@Override
+	public String getUsername()
+	{
+		return username;
+	}
+
+	@Override
+	public String getPassword()
+	{
+		return password;
+	}
+
+	@Override
+	public String toString()
+	{
+		return username;
+	}
+>>>>>>> 40b1c90824edfea1c764b751e0a46fdb0a7d1df1
 }
