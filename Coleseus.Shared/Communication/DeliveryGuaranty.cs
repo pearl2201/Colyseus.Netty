@@ -4,7 +4,10 @@ using System.Text;
 
 namespace Coleseus.Shared.Communication
 {
-    class DeliveryGuaranty
+    public enum DeliveryGuaranty : int
     {
+        RELIABLE = 0,
+        FAST = 1
     }
+
 }

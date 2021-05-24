@@ -1,263 +1,263 @@
-
-
-
+using Coleseus.Shared.Util;
 using DotNetty.Buffers;
+using System;
 /**
 * This class is an implementation of the {@link MessageBuffer} interface. It is a thin
-* wrapper over the the Netty {@link ByteBuf} with some additional methods
+* wrapper over the the Netty {@link IByteBuffer} with some additional methods
 * for string and object read write. It does not expose all methods of the
 * ChannelBuffer, instead it has a method {@link #getNativeBuffer()} which can
 * be used to retrieve the buffer and then call the appropriate method. For
-* writing to the buffer, this class uses {@link ByteBuf}
+* writing to the buffer, this class uses {@link IByteBuffer}
 * implementation.
 * 
 * @author Abraham Menacherry
 * 
 */
-public class NettyMessageBuffer implements MessageBuffer<ByteBuf>
+public class NettyMessageBuffer : MessageBuffer<IByteBuffer>
 {
-	private final ByteBuf buffer;
+    private IByteBuffer buffer;
 
-	public NettyMessageBuffer()
-	{
-		buffer = Unpooled.buffer();
-	}
+    public NettyMessageBuffer()
+    {
+        buffer = Unpooled.Buffer();
+    }
 
-	/**
+    /**
 	 * This constructor can be used when trying to read information from a
-	 * {@link ByteBuf}.
+	 * {@link IByteBuffer}.
 	 * 
 	 * @param buffer
 	 */
-	public NettyMessageBuffer(ByteBuf buffer)
-	{
-		this.buffer = buffer;
-	}
+    public NettyMessageBuffer(IByteBuffer buffer)
+    {
+        this.buffer = buffer;
+    }
 
-	@Override
-	public boolean isReadable()
-	{
-		return buffer.isReadable();
-	}
 
-	@Override
-	public int readableBytes()
-	{
-		return buffer.readableBytes();
-	}
-	
-	@Override
-	public byte[] array()
-	{
-		return buffer.array();
-	}
+    public bool isReadable()
+    {
+        return buffer.IsReadable();
+    }
 
-	@Override
-	public void clear()
-	{
-		buffer.clear();
-	}
 
-	@Override
-	public ByteBuf getNativeBuffer()
-	{
-		return buffer;
-	}
+    public int readableBytes()
+    {
+        return buffer.ReadableBytes;
+    }
 
-	@Override
-	public int readByte()
-	{
-		return buffer.readByte();
-	}
 
-	@Override
-	public int readUnsignedByte()
-	{
-		return buffer.readUnsignedByte();
-	}
+    public byte[] array()
+    {
+        return buffer.Array;
+    }
 
-	@Override
-	public byte[] readBytes(int length)
-	{
-		byte[] bytes = new byte[length];
-		buffer.readBytes(bytes);
-		return bytes;
-	}
 
-	@Override
-	public void readBytes(byte[] dst)
-	{
-		buffer.readBytes(dst);
-	}
+    public void clear()
+    {
+        buffer.Clear();
+    }
 
-	@Override
-	public void readBytes(byte[] dst, int dstIndex, int length)
-	{
-		buffer.readBytes(dst, dstIndex, length);
-	}
 
-	@Override
-	public char readChar()
-	{
-		return buffer.readChar();
-	}
+    public IByteBuffer getNativeBuffer()
+    {
+        return buffer;
+    }
 
-	@Override
-	public int readUnsignedShort()
-	{
-		return buffer.readUnsignedShort();
-	}
 
-	@Override
-	public int readShort()
-	{
-		return buffer.readShort();
-	}
+    public int readByte()
+    {
+        return buffer.ReadByte();
+    }
 
-	@Override
-	public int readUnsignedMedium()
-	{
-		return buffer.readUnsignedMedium();
-	}
 
-	@Override
-	public int readMedium()
-	{
-		return buffer.readMedium();
-	}
+    public int readUnsignedByte()
+    {
+        return buffer.ReadUnsignedShortLE();
+    }
 
-	@Override
-	public long readUnsignedInt()
-	{
-		return buffer.readUnsignedInt();
-	}
 
-	@Override
-	public int readInt()
-	{
-		return buffer.readInt();
-	}
+    public byte[] readBytes(int length)
+    {
+        byte[] bytes = new byte[length];
+        buffer.ReadBytes(bytes);
+        return bytes;
+    }
 
-	@Override
-	public long readLong()
-	{
-		return buffer.readLong();
-	}
 
-	@Override
-	public float readFloat()
-	{
-		return buffer.readFloat();
-	}
+    public void readBytes(byte[] dst)
+    {
+        buffer.ReadBytes(dst);
+    }
 
-	@Override
-	public double readDouble()
-	{
-		return buffer.readChar();
-	}
 
-	@Override
-	public String readString()
-	{
-		return NettyUtils.readString(buffer);
-	}
+    public void readBytes(byte[] dst, int dstIndex, int length)
+    {
+        buffer.ReadBytes(dst, dstIndex, length);
+    }
 
-	@Override
-	public String[] readStrings(int numOfStrings)
-	{
-		return NettyUtils.readStrings(buffer, numOfStrings);
-	}
 
-	public <V> V readObject(Transform<ByteBuf,V> converter)
-	{
-		return NettyUtils.readObject(buffer, converter);
-	}
-		
-	@Override
-	public MessageBuffer<ByteBuf> writeByte(byte b)
-	{
-		buffer.writeByte(b);
-		return this;
-	}
+    public char readChar()
+    {
+        return buffer.ReadChar();
+    }
 
-	@Override
-	public MessageBuffer<ByteBuf> writeBytes(byte[] src)
-	{
-		buffer.writeBytes(src);
-		return this;
-	}
 
-	@Override
-	public MessageBuffer<ByteBuf> writeChar(int value)
-	{
-		buffer.writeChar(value);
-		return this;
-	}
+    public int readUnsignedShort()
+    {
+        return buffer.ReadUnsignedShort();
+    }
 
-	@Override
-	public MessageBuffer<ByteBuf> writeShort(int value)
-	{
-		buffer.writeShort(value);
-		return this;
-	}
 
-	@Override
-	public MessageBuffer<ByteBuf> writeMedium(int value)
-	{
-		buffer.writeMedium(value);
-		return this;
-	}
+    public int readShort()
+    {
+        return buffer.ReadShort();
+    }
 
-	@Override
-	public MessageBuffer<ByteBuf> writeInt(int value)
-	{
-		buffer.writeInt(value);
-		return this;
-	}
 
-	@Override
-	public MessageBuffer<ByteBuf> writeLong(long value)
-	{
-		buffer.writeLong(value);
-		return this;
-	}
+    public int readUnsignedMedium()
+    {
+        return buffer.ReadUnsignedMedium();
+    }
 
-	@Override
-	public MessageBuffer<ByteBuf> writeFloat(float value)
-	{
-		buffer.writeFloat(value);
-		return this;
-	}
 
-	@Override
-	public MessageBuffer<ByteBuf> writeDouble(double value)
-	{
-		buffer.writeDouble(value);
-		return this;
-	}
+    public int readMedium()
+    {
+        return buffer.ReadMedium();
+    }
 
-	@Override
-	public MessageBuffer<ByteBuf> writeString(String message)
-	{
-		ByteBuf strBuf = NettyUtils.writeString(message);
-		buffer.writeBytes(strBuf);
-		return this;
-	}
 
-	@Override
-	public MessageBuffer<ByteBuf> writeStrings(String[] messages)
-	{
-		ByteBuf strMultiBuf = ByteBufferUtil.WriteUtf8(messages);
-		buffer.writeBytes(strMultiBuf);
-		return this;
-	}
+    public long readUnsignedInt()
+    {
+        return buffer.ReadUnsignedInt();
+    }
 
-	@Override
-	public MessageBuffer<ByteBuf> writeObject<V>(
-			Func<V, ByteBuf> converter, V data) {
-		ByteBuf objBuf = ByteBufferUtil.writeObject(converter, data);
-		buffer.writeBytes(objBuf);
-		return this;
-	}
+
+    public int readInt()
+    {
+        return buffer.ReadInt();
+    }
+
+
+    public long readLong()
+    {
+        return buffer.ReadLong();
+    }
+
+
+    public float readFloat()
+    {
+        return buffer.ReadFloat();
+    }
+
+
+    public double readDouble()
+    {
+        return buffer.ReadChar();
+    }
+
+
+    public string readString()
+    {
+        return NettyUtils.readString(buffer);
+    }
+
+
+    public string[] readStrings(int numOfStrings)
+    {
+        return NettyUtils.readStrings(buffer, numOfStrings);
+    }
+
+    public V readObject<V>(Func<IByteBuffer, V> converter)
+    {
+        return NettyUtils.readObject<IByteBuffer, V>(buffer, converter);
+    }
+
+
+    public MessageBuffer<IByteBuffer> writeByte(byte b)
+    {
+        buffer.WriteByte(b);
+        return this;
+    }
+
+
+    public MessageBuffer<IByteBuffer> writeBytes(byte[] src)
+    {
+        buffer.WriteBytes(src);
+        return this;
+    }
+
+
+    public MessageBuffer<IByteBuffer> writeChar(char value)
+    {
+        buffer.WriteChar(value);
+        return this;
+    }
+
+
+    public MessageBuffer<IByteBuffer> writeShort(int value)
+    {
+        buffer.WriteShort(value);
+        return this;
+    }
+
+
+    public MessageBuffer<IByteBuffer> writeMedium(int value)
+    {
+        buffer.WriteMedium(value);
+        return this;
+    }
+
+
+    public MessageBuffer<IByteBuffer> writeInt(int value)
+    {
+        buffer.WriteInt(value);
+        return this;
+    }
+
+
+    public MessageBuffer<IByteBuffer> writeLong(long value)
+    {
+        buffer.WriteLong(value);
+        return this;
+    }
+
+
+    public MessageBuffer<IByteBuffer> writeFloat(float value)
+    {
+        buffer.WriteFloat(value);
+        return this;
+    }
+
+
+    public MessageBuffer<IByteBuffer> writeDouble(double value)
+    {
+        buffer.WriteDouble(value);
+        return this;
+    }
+
+
+    public MessageBuffer<IByteBuffer> writeString(string message)
+    {
+        IByteBuffer strBuf = NettyUtils.WriteString(message);
+        buffer.WriteBytes(strBuf);
+        return this;
+    }
+
+
+    public MessageBuffer<IByteBuffer> writeStrings(string[] messages)
+    {
+        IByteBuffer strMultiBuf = NettyUtils.writeStrings(messages);
+        buffer.WriteBytes(strMultiBuf);
+        return this;
+    }
+
+
+    public MessageBuffer<IByteBuffer> writeObject<V>(
+            Func<V, IByteBuffer> converter, V data)
+    {
+        IByteBuffer objBuf = NettyUtils.writeObject(converter, data);
+        buffer.WriteBytes(objBuf);
+        return this;
+    }
 
 }

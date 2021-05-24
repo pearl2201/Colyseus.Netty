@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+<<<<<<< HEAD
 using System.Text;
 
 public class BinaryUtils
@@ -45,4 +46,36 @@ public class BinaryUtils
         }
         return hex.toString();
     }
+=======
+public class BinaryUtils
+{
+
+	private static const String HEXES = "0123456789ABCDEF";
+
+	public static String getHexString(byte[] raw)
+	{
+		return getHexString(raw, null);
+	}
+
+	public static String getHexString(byte[] raw, String separator)
+	{
+		bool sep = (null != separator) && !("".equals(separator));
+
+		if (raw == null)
+		{
+			return null;
+		}
+		var StringBuilder hex = new StringBuilder(2 * raw.length);
+		for (var byte b : raw)
+		{
+			hex.append(HEXES.charAt((b & 0xF0) >> 4)).append(
+					HEXES.charAt((b & 0x0F)));
+			if (sep)
+			{
+				hex.append(separator);
+			}
+		}
+		return hex.toString();
+	}
+>>>>>>> 40b1c90824edfea1c764b751e0a46fdb0a7d1df1
 }

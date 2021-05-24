@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Coleseus.Shared.Event
+namespace Coleseus.Shared.App.Impl
 {
-    class Event
+    class DefaultPlayerSession
     {
     }
 }
