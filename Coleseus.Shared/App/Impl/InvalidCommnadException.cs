@@ -4,7 +4,11 @@ using System.Text;
 
 namespace Coleseus.Shared.App.Impl
 {
-    class InvalidCommnadException
+    public class InvalidCommnadException : Exception
     {
+        public InvalidCommnadException(string message) : base(message)
+        {
+
+        }
     }
 }

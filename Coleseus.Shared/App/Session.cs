@@ -30,12 +30,10 @@ namespace Coleseus.Shared.App
 
         void onEvent(IEvent @event);
 
-        IEventDispatcher getEventDispatcher();
+        IEventDispatcher eventDispatcher { get; }
 
 
-        bool isWriteable();
-
-        void setWriteable(bool writeable);
+        bool isWriteable { get; set; }
 
         /**
 		 * A session would not have UDP capability when created. Depending on the
@@ -46,39 +44,25 @@ namespace Coleseus.Shared.App
 		 * @return Returns true if the a UDP {@link MessageSender} instance is
 		 *         attached to this session, else false.
 		 */
-        bool isUDPEnabled();
+        bool isUDPEnabled { get; set; }
 
-        /**
-		 * A session would not have UDP capability when created. Depending on the
-		 * network abilities of the client, it can request UDP communication to be
-		 * enabled with the LOGIN_UDP and CONNECT_UDP events of the {@link Events}
-		 * class. Once UDP {@link MessageSender} instance is attached to the
-		 * session, this method should be called with flag to true to signal that
-		 * the session is now UDP enabled.
-		 * 
-		 * @param isEnabled
-		 *            Should be true in most use cases. It is used to signal that
-		 *            the UDP {@link MessageSender} has been attached to session.
-		 */
-        void setUDPEnabled(bool isEnabled);
+        bool isShuttingDown { get; }
 
-        bool isShuttingDown();
+        DateTime creationTime { get; }
 
-        long getCreationTime();
+        DateTime lastReadWriteTime { get; }
 
-        long getLastReadWriteTime();
+      
 
-        void setStatus(SessionStatus status);
-
-        SessionStatus getStatus();
+        SessionStatus status { get; set; }
 
         bool isConnected();
 
-        void addHandler(EventHandler eventHandler);
+        void addHandler(IEventHandler eventHandler);
 
-        void removeHandler(EventHandler eventHandler);
+        void removeHandler(IEventHandler eventHandler);
 
-        List<EventHandler> getEventHandlers(int eventType);
+        List<IEventHandler> getEventHandlers(int eventType);
 
         void close();
 

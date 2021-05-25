@@ -1,3 +1,4 @@
+using Coleseus.Shared.Communication;
 using Coleseus.Shared.Util;
 using DotNetty.Buffers;
 using System;

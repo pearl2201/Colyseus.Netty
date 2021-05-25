@@ -8,8 +8,8 @@ namespace Coleseus.Shared.App
     {
         T getPayload();
         void setPayload(T payload);
-        PlayerSession getPlayerSession();
-        void setPlayerSession(PlayerSession playerSession);
+        IPlayerSession getPlayerSession();
+        void setPlayerSession(IPlayerSession playerSession);
         O getOpCode();
         void setOpcode(O opcode);
         E getEventType();

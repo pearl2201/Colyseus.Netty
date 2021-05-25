@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Coleseus.Shared.Service.Impl
 {
-    class SimpleUniqueIdGenerator
+    public class SimpleUniqueIdGenerator : UniqueIDGeneratorService
     {
     }
 }

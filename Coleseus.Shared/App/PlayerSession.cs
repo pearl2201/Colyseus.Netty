@@ -33,7 +33,7 @@ namespace Coleseus.Shared.App
          * @return Returns the associated game room object or null if none is
          *         associated.
          */
-        IGameRoom getGameRoom();
+        GameRoom getGameRoom();
 
         /**
          * Method used to set the game room for a particular session.
@@ -41,7 +41,7 @@ namespace Coleseus.Shared.App
          * @param gameRoom
          *            The gameRoom object to set.
          */
-        void setGameRoom(IGameRoom gameRoom);
+        void setGameRoom(GameRoom gameRoom);
 
         /**
          * Get the {@link Protocol} associated with this session.

@@ -1,15 +1,17 @@
-﻿using DotNetty.Transport.Channels;
+﻿using Coleseus.Shared.Event;
+using DotNetty.Transport.Channels;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace Coleseus.Shared.Communication
 {
     public class NettyTCPMessageSender : Reliable
     {
         private readonly IChannel _channel;
-        private DeliveryGuaranty DELIVERY_GUARANTY = DeliveryGuarantyOptions.RELIABLE;
+        private DeliveryGuaranty DELIVERY_GUARANTY = DeliveryGuaranty.RELIABLE;
         private readonly ILogger<NettyTCPMessageSender> _logger;
 
         public NettyTCPMessageSender(IChannel channel)
@@ -44,20 +46,20 @@ namespace Coleseus.Shared.Communication
         public void close()
         {
             _logger.LogDebug("Going to close tcp connection");
-            Event event = Events.event (null, Events.DISCONNECT);
-		if (_channel.Active)
-		{
-			channel.write(event).addListener(ChannelFutureListener.CLOSE);
-		}
-		else
-		{
-			channel.close();
-			_logger.LogDebug("Unable to write the Event {} with type {} to socket",
-					event, event.getType());
+            IEvent @event = Events.CreateEvent(null, Events.DISCONNECT);
+            if (_channel.Active)
+            {
+                _channel.WriteAsync(@event).Wait();
+            }
+            else
+            {
+                _channel.CloseAsync().Wait();
+                _logger.LogDebug("Unable to write the Event {} with type {} to socket",
+                        @event, @event.GetType());
 
-    }
+            }
 
-
+        }
 
 
         public override string ToString()
@@ -75,4 +77,6 @@ namespace Coleseus.Shared.Communication
             return sender;
         }
     }
+
+}
 
