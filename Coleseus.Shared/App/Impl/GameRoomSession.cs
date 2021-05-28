@@ -2,10 +2,12 @@
 using Coleseus.Shared.Event;
 using Coleseus.Shared.Protocols;
 using Coleseus.Shared.Service;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Threading;
 
 namespace Coleseus.Shared.App.Impl
 {
@@ -93,25 +95,25 @@ namespace Coleseus.Shared.App.Impl
     }
 
 
-    public IPlayerSession createPlayerSession(Player player)
+    public IPlayerSession createPlayerSession(IPlayer player)
     {
         IPlayerSession playerSession = getSessionInstance(player);
         return playerSession;
     }
 
 
-    public abstract void onLogin(PlayerSession playerSession);
+    public abstract void onLogin(IPlayerSession playerSession);
 
 
-    public synchronized bool connectSession(PlayerSession playerSession)
+    public synchronized bool connectSession(IPlayerSession playerSession)
 
     {
         if (!isShuttingDown)
         {
-            playerSession.setStatus(Session.Status.CONNECTING);
+            playerSession.setStatus(SessionStatus.CONNECTING);
             sessions.add(playerSession);
             playerSession.setGameRoom(this);
-            LOG.trace("Protocol to be applied is: {}", protocol.getClass().getName());
+            _logger.LogTrace("Protocol to be applied is: {}", protocol.GetType().Name);
             protocol.applyProtocol(playerSession, true);
             createAndAddEventHandlers(playerSession);
             playerSession.setStatus(Session.Status.CONNECTED);
@@ -130,12 +132,12 @@ namespace Coleseus.Shared.App.Impl
 
     public abstract class GameRoomSession : DefaultSession, GameRoom
     {
-        private static final Logger LOG = LoggerFactory.getLogger(GameRoomSession.class);
-	
-	/**
-	 * The name of the game room, preferably unique across multiple games.
-	 */
-	protected String gameRoomName;
+        private ILogger<GameRoomSession> _logger;
+
+        /**
+         * The name of the game room, preferably unique across multiple games.
+         */
+        protected string gameRoomName;
         /**
          * The parent {@link SimpleGame} reference of this game room.
          */
@@ -158,9 +160,11 @@ namespace Coleseus.Shared.App.Impl
 
         protected SessionFactory sessionFactory;
 
-        protected GameRoomSession(GameRoomSessionBuilder gameRoomSessionBuilder)
+        private Mutex mute = new Mutex();
+
+        protected GameRoomSession(GameRoomSessionBuilder gameRoomSessionBuilder) : base(gameRoomSessionBuilder)
         {
-            super(gameRoomSessionBuilder);
+
             this.sessions = gameRoomSessionBuilder.sessions;
             this.parentGame = gameRoomSessionBuilder.parentGame;
             this.gameRoomName = gameRoomSessionBuilder.gameRoomName;
@@ -196,7 +200,7 @@ namespace Coleseus.Shared.App.Impl
         {
             bool removeHandlers = this.eventDispatcher.removeHandlersForSession(playerSession);
             //playerSession.getEventDispatcher().clear(); // remove network handlers of the session.
-            return (removeHandlers && sessions.remove(playerSession));
+            return (removeHandlers && sessions.Remove(playerSession));
         }
 
 
@@ -212,29 +216,31 @@ namespace Coleseus.Shared.App.Impl
         }
 
 
-        public synchronized void close()
+        public void close()
         {
+            mute.WaitOne();
             isShuttingDown = true;
-            for (PlayerSession session: sessions)
+            foreach (IPlayerSession session in sessions)
             {
                 session.close();
             }
+            mute.ReleaseMutex();
         }
 
-        public PlayerSession getSessionInstance(Player player)
+        public IPlayerSession getSessionInstance(IPlayer player)
         {
-            PlayerSession playerSession = sessionFactory.newPlayerSession(this, player);
+            IPlayerSession playerSession = sessionFactory.newPlayerSession(this, player);
             return playerSession;
         }
 
 
-        public Set<PlayerSession> getSessions()
+        public HashSet<IPlayerSession> getSessions()
         {
             return sessions;
         }
 
 
-        public void setSessions(Set<PlayerSession> sessions)
+        public void setSessions(HashSet<IPlayerSession> sessions)
         {
             this.sessions = sessions;
         }
@@ -252,37 +258,37 @@ namespace Coleseus.Shared.App.Impl
         }
 
 
-        public Game getParentGame()
+        public IGame getParentGame()
         {
             return parentGame;
         }
 
 
-        public void setParentGame(Game parentGame)
+        public void setParentGame(IGame parentGame)
         {
             this.parentGame = parentGame;
         }
 
 
-        public void setStateManager(GameStateManagerService stateManager)
+        public void setStateManager(IGameStateManagerService stateManager)
         {
             this.stateManager = stateManager;
         }
 
 
-        public GameStateManagerService getStateManager()
+        public IGameStateManagerService getStateManager()
         {
             return stateManager;
         }
 
 
-        public Protocol getProtocol()
+        public IProtocol getProtocol()
         {
             return protocol;
         }
 
 
-        public void setProtocol(Protocol protocol)
+        public void setProtocol(IProtocol protocol)
         {
             this.protocol = protocol;
         }
@@ -317,14 +323,14 @@ namespace Coleseus.Shared.App.Impl
          * @param playerSession
          *            The session for which the event handlers are created.
          */
-        protected void createAndAddEventHandlers(PlayerSession playerSession)
+        protected void createAndAddEventHandlers(IPlayerSession playerSession)
         {
             // Create a network event listener for the player session.
             EventHandler networkEventHandler = new NetworkEventListener(playerSession);
             // Add the handler to the game room's EventDispatcher so that it will
             // pass game room network events to player session session.
             this.eventDispatcher.addHandler(networkEventHandler);
-            LOG.trace("Added Network handler to "
+            _logger.LogTrace("Added Network handler to "
                     + "EventDispatcher of GameRoom {}, for session: {}", this,
                     playerSession);
         }

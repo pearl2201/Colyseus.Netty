@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 public enum TimeUnit
 {
-
+	MILLISECONDS
 }
 namespace Coleseus.Shared.Service
 {

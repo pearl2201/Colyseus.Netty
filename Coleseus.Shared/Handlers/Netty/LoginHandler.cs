@@ -20,7 +20,7 @@ namespace Coleseus.Shared.Handlers.Netty
 
         private readonly ILogger<LoginHandler> _logger;
 
-        protected LookupService lookupService;
+        protected ILookupService lookupService;
         protected ISessionRegistryService<SocketAddress> udpSessionRegistry;
         protected ReconnectSessionRegistry reconnectRegistry;
         protected UniqueIDGeneratorService idGeneratorService;
@@ -100,7 +100,7 @@ namespace Coleseus.Shared.Handlers.Netty
             return player;
         }
 
-        public IPlayerSession lookupSession(final String reconnectKey)
+        public IPlayerSession lookupSession(string reconnectKey)
         {
             IPlayerSession playerSession = (IPlayerSession)reconnectRegistry.getSession(reconnectKey);
             if (null != playerSession)
@@ -109,9 +109,9 @@ namespace Coleseus.Shared.Handlers.Netty
                     // if its an already active session then do not allow a
                     // reconnect. So the only state in which a client is allowed to
                     // reconnect is if it is "NOT_CONNECTED"
-                    if (playerSession.getStatus() == SessionStatus.NOT_CONNECTED)
+                    if (playerSession.status == SessionStatus.NOT_CONNECTED)
                     {
-                        playerSession.setStatus(SessionStatus.CONNECTING);
+                        playerSession.status = SessionStatus.CONNECTING;
                     }
                     else
                     {
@@ -126,14 +126,14 @@ namespace Coleseus.Shared.Handlers.Netty
         {
             if (null != player)
             {
-                ctx.channel().write(NettyUtils
-                        .createBufferForOpcode(Events.LOG_IN_SUCCESS));
+                ctx.Channel.WriteAsync(NettyUtils
+                        .createBufferForOpcode(Events.LOG_IN_SUCCESS)).Wait();
                 handleGameRoomJoin(player, ctx, buffer);
             }
             else
             {
                 // Write future and close channel
-                closeChannelWithLoginFailure(ctx.channel());
+                closeChannelWithLoginFailure(ctx.Channel);
             }
         }
 
@@ -151,12 +151,12 @@ namespace Coleseus.Shared.Handlers.Netty
                 if (null != playerSession.getUdpSender())
                     playerSession.getUdpSender().close();
 
-                handleReJoin(playerSession, gameRoom, ctx.channel(), buffer);
+                handleReJoin(playerSession, gameRoom, ctx.Channel, buffer);
             }
             else
             {
                 // Write future and close channel
-                closeChannelWithLoginFailure(ctx.Channel());
+                closeChannelWithLoginFailure(ctx.Channel);
             }
         }
 
@@ -183,7 +183,7 @@ namespace Coleseus.Shared.Handlers.Netty
             {
                 IPlayerSession playerSession = gameRoom.createPlayerSession(player);
                 String reconnectKey = (String)idGeneratorService
-                        .generateFor(playerSession.getClass());
+                        .generateFor(playerSession.GetType());
                 playerSession.setAttribute(NadronConfig.RECONNECT_KEY, reconnectKey);
                 playerSession.setAttribute(NadronConfig.RECONNECT_REGISTRY, reconnectRegistry);
                 _logger.Debug("Sending GAME_ROOM_JOIN_SUCCESS to channel {}", channel);

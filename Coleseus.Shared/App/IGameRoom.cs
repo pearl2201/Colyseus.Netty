@@ -19,7 +19,7 @@ namespace Coleseus.Shared.App
 	 * @author Abraham Menacherry
 	 * 
 	 */
-    public abstract class GameRoom
+    public interface GameRoom
     {
 
         /**
@@ -30,13 +30,13 @@ namespace Coleseus.Shared.App
 		 * 
 		 * @return The game specific implementation of the player session.
 		 */
-        public abstract IPlayerSession createPlayerSession(IPlayer player);
+        IPlayerSession createPlayerSession(IPlayer player);
 
         /**
 		 * Method called after the session is created. Can be used to add
 		 * EventListeners to the session
 		 */
-        public abstract void onLogin(IPlayerSession playerSession);
+        void onLogin(IPlayerSession playerSession);
 
         /**
 		 * When a new user connects to the game, this method will be invoked to add
@@ -47,13 +47,13 @@ namespace Coleseus.Shared.App
 		 *            a {@link Channel} object wrapped in a {@link PlayerSession}.
 		 * @return true if session is connected successfully.
 		 */
-        public abstract bool connectSession(IPlayerSession playerSession);
+        bool connectSession(IPlayerSession playerSession);
 
         /**
 		 * Method called after the session is created. Can be used to add
 		 * EventListeners to the session
 		 */
-        public abstract void afterSessionConnect(IPlayerSession playerSession);
+        void afterSessionConnect(IPlayerSession playerSession);
 
         /**
 		 * Remove a session from the existing list of user sessions.
@@ -62,26 +62,26 @@ namespace Coleseus.Shared.App
 		 *            The session to be removed from the set.
 		 * @return true if removal was successful and false if it was not.
 		 */
-        public abstract bool disconnectSession(IPlayerSession session);
+        bool disconnectSession(IPlayerSession session);
 
         /**
 		 * Returns a list of sessions that is held by the game room.
 		 * 
 		 * @return Returns the set of user sessions associated with game room.
 		 */
-        public abstract HashSet<IPlayerSession> getSessions();
+        HashSet<IPlayerSession> getSessions();
 
         /**
 		 * @return Returns the name of the game room
 		 */
-        public abstract String getGameRoomName();
+        String getGameRoomName();
 
         /**
 		 * Sets the name of the game room. Preferably unique.
 		 * 
 		 * @param gameRoomName
 		 */
-        public abstract void setGameRoomName(String gameRoomName);
+        void setGameRoomName(String gameRoomName);
 
         /**
 		 * Each game room belongs to a game. This method can be used to retrieve
@@ -89,7 +89,7 @@ namespace Coleseus.Shared.App
 		 * 
 		 * @return Returns the associated parent game object.
 		 */
-        public abstract IGame getParentGame();
+        IGame getParentGame();
 
         /**
 		 * Used to set the parent game object of the game room. By setting this we
@@ -98,7 +98,7 @@ namespace Coleseus.Shared.App
 		 * @param parentGame
 		 *            The game to which this game room belongs.
 		 */
-        public abstract void setParentGame(IGame parentGame);
+        void setParentGame(IGame parentGame);
 
         /**
 		 * Every non trivial game will have some sort of state management service
@@ -109,7 +109,7 @@ namespace Coleseus.Shared.App
 		 * @return returns the state manager instance associated with the game room
 		 *         or null if none are associated.
 		 */
-        public abstract IGameStateManagerService getStateManager();
+        IGameStateManagerService getStateManager();
 
         /**
 		 * Method used to set the state manager for a game room. Each game room will
@@ -119,7 +119,7 @@ namespace Coleseus.Shared.App
 		 * 
 		 * @param stateManager
 		 */
-        public abstract void setStateManager(IGameStateManagerService stateManager);
+        void setStateManager(IGameStateManagerService stateManager);
 
         /**
 		 * Each game room has a protocol attached to it. This protocol object can be
@@ -128,7 +128,7 @@ namespace Coleseus.Shared.App
 		 * 
 		 * @return Returns the associated protocol instance.
 		 */
-        public abstract IProtocol getProtocol();
+        IProtocol getProtocol();
 
         /**
 		 * Sets the protocol instance on the game room. This protocol object can be
@@ -138,7 +138,7 @@ namespace Coleseus.Shared.App
 		 * @param protocol
 		 *            The protocol instance to set.
 		 */
-        public abstract void setProtocol(IProtocol protocol);
+        void setProtocol(IProtocol protocol);
 
         /**
 		 * Method used to set the set of user sessions to a particular game room.
@@ -146,7 +146,7 @@ namespace Coleseus.Shared.App
 		 * @param sessions
 		 *            The set of sessions to be set.
 		 */
-        public abstract void setSessions(HashSet<IPlayerSession> sessions);
+        void setSessions(HashSet<IPlayerSession> sessions);
 
         /**
 		 * Used to send an event to the GameRoom. The room can listen on this method
@@ -159,7 +159,7 @@ namespace Coleseus.Shared.App
 		 * 
 		 * @param event The event to send to room
 		 */
-        public abstract void send(IEvent @event);
+        void send(IEvent @event);
 
         /**
          * Method used to send a broadcast message to all sessions in the group. It
@@ -171,18 +171,18 @@ namespace Coleseus.Shared.App
          *            The message that is to be broadcast to all user sessions of
          *            this game room
          */
-        public abstract void sendBroadcast(INetworkEvent networkEvent);
+        void sendBroadcast(INetworkEvent networkEvent);
 
         /**
 		 * This method will close down the game room. It can be used to disconnect
 		 * all users connected to a game room.
 		 * 
 		 */
-        public abstract void close();
+        void close();
 
-        public abstract void setFactory(SessionFactory factory);
+        void setFactory(SessionFactory factory);
 
-        public abstract SessionFactory getFactory();
+        SessionFactory getFactory();
 
     }
 }

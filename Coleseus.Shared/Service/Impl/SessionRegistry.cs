@@ -22,7 +22,7 @@ namespace Coleseus.Shared.Service.Impl
 	}
 
 	
-	public bool putSession(T key, ISession session)
+	public virtual bool putSession(T key, ISession session)
 	{
 		if (null == key || null == session)
 		{
