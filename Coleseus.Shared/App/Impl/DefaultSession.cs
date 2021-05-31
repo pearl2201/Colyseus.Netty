@@ -36,7 +36,7 @@ namespace Coleseus.Shared.App.Impl
          */
         protected Dictionary<String, Object> sessionAttributes;
 
-        public DateTime creationTime { get; private set; }
+        public DateTime creationTime { get; protected set; }
 
         public DateTime lastReadWriteTime { get; set; }
 
@@ -48,7 +48,7 @@ namespace Coleseus.Shared.App.Impl
          * Life cycle variable to check if the session is shutting down. If it is, then no
          * more incoming events will be accepted.
          */
-        public bool isShuttingDown { get; private set; }
+        public bool isShuttingDown { get; protected set; }
 
         public bool isUDPEnabled { get; set; }
 

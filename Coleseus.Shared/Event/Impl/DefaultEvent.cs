@@ -62,7 +62,7 @@ namespace Coleseus.Shared.Event.Impl
             this.eventContext = context;
         }
 
-        public String toString()
+        public override string ToString()
         {
             return "Event [type=" + type + ", source=" + source + ", timeStamp="
                     + timeStamp + "]";

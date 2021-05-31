@@ -17,14 +17,14 @@ namespace Coleseus.Shared.Server.Netty
 	 * @author Abraham Menacherry
 	 * 
 	 */
-    public class NettyUDPServer<T> : AbstractNettyServer<T> where T : IChannel
+    public class NettyUDPServer : AbstractNettyServer
     {
-        private readonly ILogger<NettyUDPServer<T>> _logger;
+        private readonly ILogger<NettyUDPServer> _logger;
 
         private Bootstrap serverBootstrap;
 
         public NettyUDPServer(NettyConfig nettyConfig,
-                ChannelInitializer<T> channelInitializer) : base(nettyConfig, channelInitializer)
+                IChannelHandler channelInitializer) : base(nettyConfig, channelInitializer)
         {
 
         }
@@ -67,10 +67,10 @@ namespace Coleseus.Shared.Server.Netty
         }
 
 
-        public void SetChannelInitializer(ChannelInitializer<T> initializer)
+        public void SetChannelInitializer(IChannelHandler initializer)
         {
             this.channelInitializer = initializer;
-            serverBootstrap.ChildHandler(initializer);
+            serverBootstrap.Handler(initializer);
         }
 
 

@@ -17,14 +17,14 @@ namespace Coleseus.Shared.Server.Netty
 	 * @author Abraham Menacherry
 	 * 
 	 */
-    public class NettyTCPServer<T> : AbstractNettyServer<T> where T : IChannel
+    public class NettyTCPServer : AbstractNettyServer
     {
-        private readonly ILogger<NettyTCPServer<T>> _logger;
+        private readonly ILogger<NettyTCPServer> _logger;
 
         private ServerBootstrap serverBootstrap;
 
         public NettyTCPServer(NettyConfig nettyConfig,
-                ChannelInitializer<T> channelInitializer) : base(nettyConfig, channelInitializer)
+                IChannelHandler channelInitializer) : base(nettyConfig, channelInitializer)
         {
 
         }
@@ -48,8 +48,8 @@ namespace Coleseus.Shared.Server.Netty
                             .Channel<TcpServerSocketChannel>()
                     .ChildHandler(getChannelInitializer());
                 IChannel serverChannel = await serverBootstrap.BindAsync(nettyConfig.getSocketAddress());
-              
-                ALL_CHANNELS.add(serverChannel);
+
+                ALL_CHANNELS.Add(serverChannel);
             }
             catch (Exception e)
             {
@@ -66,7 +66,7 @@ namespace Coleseus.Shared.Server.Netty
         }
 
 
-        public void SetChannelInitializer(ChannelInitializer<T> initializer)
+        public void SetChannelInitializer(IChannelHandler initializer)
         {
             this.channelInitializer = initializer;
             serverBootstrap.ChildHandler(initializer);

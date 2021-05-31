@@ -16,6 +16,6 @@ namespace Coleseus.Shared.App
     {
          ISession newSession();
 
-         IPlayerSession newPlayerSession(GameRoom gameRoom, Player player);
+         IPlayerSession newPlayerSession(GameRoom gameRoom, IPlayer player);
     }
 }

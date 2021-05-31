@@ -1,5 +1,7 @@
 ﻿using Coleseus.Shared.App;
+using Coleseus.Shared.Communication;
 using Coleseus.Shared.Event;
+using Coleseus.Shared.Event.Impl;
 using Coleseus.Shared.Server.Netty;
 using Coleseus.Shared.Service;
 using Coleseus.Shared.Service.Impl;
@@ -11,6 +13,8 @@ using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Coleseus.Shared.Handlers.Netty
 {
@@ -29,10 +33,10 @@ namespace Coleseus.Shared.Handlers.Netty
          * Used for book keeping purpose. It will count all open channels. Currently
          * closed channels will not lead to a decrement.
          */
-        private AtomicInteger CHANNEL_COUNTER = new AtomicInteger(0);
+        private int CHANNEL_COUNTER = 0;
 
 
-        public void channelRead0(IChannelHandlerContext ctx,
+        protected override void ChannelRead0(IChannelHandlerContext ctx,
                 IEvent @event)
         {
             IByteBuffer buffer = (IByteBuffer)@event.getSource();
@@ -61,20 +65,19 @@ namespace Coleseus.Shared.Handlers.Netty
                         + "Going to close channel {}",
                         new Object[] { @event.getType(), channel.RemoteAddress,
                             channel});
-                closeChannelWithLoginFailure(channel);
+                closeChannelWithLoginFailure(channel).Wait();
             }
         }
 
 
-        public async Task exceptionCaught(IChannelHandlerContext ctx, Throwable cause)
-
+        public override void ExceptionCaught(IChannelHandlerContext context, Exception exception)
 
         {
-            IChannel channel = ctx.Channel;
+            IChannel channel = context.Channel;
             _logger.LogError(
                         "Exception {} occurred during log in process, going to close channel {}",
-                        cause, channel);
-            await channel.CloseAsync();
+                        exception, channel);
+            channel.CloseAsync().Wait();
         }
 
 
@@ -82,9 +85,9 @@ namespace Coleseus.Shared.Handlers.Netty
         public override void ChannelActive(IChannelHandlerContext ctx)
         {
             base.ChannelActive(ctx);
-            AbstractNettyServer.ALL_CHANNELS.add(ctx.Channel);
+            AbstractNettyServer.ALL_CHANNELS.Add(ctx.Channel);
             _logger.LogDebug("Added Channel {} as the {}th open channel", ctx
-                    .Channel, CHANNEL_COUNTER.incrementAndGet());
+                    .Channel, Interlocked.Increment(ref CHANNEL_COUNTER));
         }
 
 
@@ -105,7 +108,8 @@ namespace Coleseus.Shared.Handlers.Netty
             IPlayerSession playerSession = (IPlayerSession)reconnectRegistry.getSession(reconnectKey);
             if (null != playerSession)
             {
-                synchronized(playerSession){
+                lock (playerSession)
+                {
                     // if its an already active session then do not allow a
                     // reconnect. So the only state in which a client is allowed to
                     // reconnect is if it is "NOT_CONNECTED"
@@ -133,7 +137,7 @@ namespace Coleseus.Shared.Handlers.Netty
             else
             {
                 // Write future and close channel
-                closeChannelWithLoginFailure(ctx.Channel);
+                closeChannelWithLoginFailure(ctx.Channel).Wait();
             }
         }
 
@@ -141,8 +145,8 @@ namespace Coleseus.Shared.Handlers.Netty
         {
             if (null != playerSession)
             {
-                ctx.write(NettyUtils
-                        .createBufferForOpcode(Events.LOG_IN_SUCCESS));
+                ctx.WriteAndFlushAsync(NettyUtils
+                        .createBufferForOpcode(Events.LOG_IN_SUCCESS)).Wait();
                 GameRoom gameRoom = playerSession.getGameRoom();
                 gameRoom.disconnectSession(playerSession);
                 if (null != playerSession.getTcpSender())
@@ -156,7 +160,7 @@ namespace Coleseus.Shared.Handlers.Netty
             else
             {
                 // Write future and close channel
-                closeChannelWithLoginFailure(ctx.Channel);
+                closeChannelWithLoginFailure(ctx.Channel).Wait();
             }
         }
 
@@ -184,141 +188,130 @@ namespace Coleseus.Shared.Handlers.Netty
                 IPlayerSession playerSession = gameRoom.createPlayerSession(player);
                 String reconnectKey = (String)idGeneratorService
                         .generateFor(playerSession.GetType());
-                playerSession.setAttribute(NadronConfig.RECONNECT_KEY, reconnectKey);
-                playerSession.setAttribute(NadronConfig.RECONNECT_REGISTRY, reconnectRegistry);
-                _logger.Debug("Sending GAME_ROOM_JOIN_SUCCESS to channel {}", channel);
-                IByteBuffer reconnectKeyBuffer = Unpooled.wrappedBuffer(NettyUtils.createBufferForOpcode(Events.GAME_ROOM_JOIN_SUCCESS),
-                                NettyUtils.writeString(reconnectKey));
-                ChannelFuture future = channel.writeAndFlush(reconnectKeyBuffer);
-                connectToGameRoom(gameRoom, playerSession, future);
+                playerSession.setAttribute(ColyseusConfig.RECONNECT_KEY, reconnectKey);
+                playerSession.setAttribute(ColyseusConfig.RECONNECT_REGISTRY, reconnectRegistry);
+                _logger.LogDebug("Sending GAME_ROOM_JOIN_SUCCESS to channel {}", channel);
+                IByteBuffer reconnectKeyBuffer = Unpooled.WrappedBuffer(NettyUtils.createBufferForOpcode(Events.GAME_ROOM_JOIN_SUCCESS),
+                                NettyUtils.WriteString(reconnectKey));
+                Task future = channel.WriteAndFlushAsync(reconnectKeyBuffer);
+                connectToGameRoom(gameRoom, playerSession, future, channel);
                 loginUdp(playerSession, buffer);
             }
             else
             {
                 // Write failure and close channel.
-                ChannelFuture future = channel.writeAndFlush(NettyUtils.createBufferForOpcode(Events.GAME_ROOM_JOIN_FAILURE));
-                future.addListener(ChannelFutureListener.CLOSE);
-                LOG.error("Invalid ref key provided by client: {}. Channel {} will be closed", refKey, channel);
+                channel.WriteAndFlushAsync(NettyUtils.createBufferForOpcode(Events.GAME_ROOM_JOIN_FAILURE));
+
+                _logger.LogError("Invalid ref key provided by client: {}. Channel {} will be closed", refKey, channel);
             }
         }
 
-        protected void handleReJoin(PlayerSession playerSession, GameRoom gameRoom, Channel channel,
+        protected void handleReJoin(IPlayerSession playerSession, GameRoom gameRoom, IChannel channel,
                 IByteBuffer buffer)
         {
-            LOG.trace("Going to clear pipeline");
+            _logger.LogTrace("Going to clear pipeline");
             // Clear the existing pipeline
-            NettyUtils.clearPipeline(channel.pipeline());
+            NettyUtils.clearPipeline(channel.Pipeline);
             // Set the tcp channel on the session. 
             NettyTCPMessageSender sender = new NettyTCPMessageSender(channel);
             playerSession.setTcpSender(sender);
             // Connect the pipeline to the game room.
             gameRoom.connectSession(playerSession);
-            playerSession.setWriteable(true);// TODO remove if unnecessary. It should be done in start @event
+            playerSession.isWriteable = true;// TODO remove if unnecessary. It should be done in start @event
                                              // Send the re-connect @event so that it will in turn send the START @event.
             playerSession.onEvent(new ReconnetEvent(sender));
             loginUdp(playerSession, buffer);
         }
 
-        public void connectToGameRoom(final GameRoom gameRoom, final PlayerSession playerSession, ChannelFuture future)
+        public void connectToGameRoom(GameRoom gameRoom, IPlayerSession playerSession, Task future, IChannel channel)
         {
-            future.addListener(new ChannelFutureListener()
-        {
-            @Override
-
-            public void operationComplete(ChannelFuture future)
-
-
-
-                    throws Exception
-
-
-
+            future.ContinueWith((x) =>
             {
-                Channel channel = future.channel();
-                LOG.trace("Sending GAME_ROOM_JOIN_SUCCESS to channel {} completed", channel);
-                if (future.isSuccess())
+                //Channel channel = future.channel();
+                _logger.LogTrace("Sending GAME_ROOM_JOIN_SUCCESS to channel {} completed", channel);
+                if (future.Status == TaskStatus.RanToCompletion)
                 {
-                    LOG.trace("Going to clear pipeline");
+                    _logger.LogTrace("Going to clear pipeline");
                     // Clear the existing pipeline
-                    NettyUtils.clearPipeline(channel.pipeline());
+                    NettyUtils.clearPipeline(channel.Pipeline);
                     // Set the tcp channel on the session. 
                     NettyTCPMessageSender tcpSender = new NettyTCPMessageSender(channel);
                     playerSession.setTcpSender(tcpSender);
                     // Connect the pipeline to the game room.
                     gameRoom.connectSession(playerSession);
                     // send the start @event to remote client.
-                    tcpSender.sendMessage(Events.@event(null, Events.START));
+                    tcpSender.sendMessage(Events.CreateEvent(null, Events.START));
                     gameRoom.onLogin(playerSession);
                 }
                 else
                 {
-                    LOG.error("GAME_ROOM_JOIN_SUCCESS message sending to client was failure, channel will be closed");
-                    channel.close();
+                    _logger.LogError("GAME_ROOM_JOIN_SUCCESS message sending to client was failure, channel will be closed");
+                    channel.CloseAsync().Wait();
                 }
-            }
-        });
-	}
+            });
 
-    /**
-     * This method adds the player session to the
-     * {@link SessionRegistryService}. The key being the remote udp address of
-     * the client and the session being the value.
-     * 
-     * @param playerSession
-     * @param buffer
-     *            Used to read the remote address of the client which is
-     *            attempting to connect via udp.
-     */
-    protected void loginUdp(PlayerSession playerSession, IByteBuffer buffer)
-    {
-        InetSocketAddress remoteAddress = NettyUtils.readSocketAddress(buffer);
-        if (null != remoteAddress)
-        {
-            udpSessionRegistry.putSession(remoteAddress, playerSession);
         }
-    }
 
-    public LookupService getLookupService()
-    {
-        return lookupService;
-    }
+        /**
+         * This method adds the player session to the
+         * {@link SessionRegistryService}. The key being the remote udp address of
+         * the client and the session being the value.
+         * 
+         * @param playerSession
+         * @param buffer
+         *            Used to read the remote address of the client which is
+         *            attempting to connect via udp.
+         */
+        protected void loginUdp(IPlayerSession playerSession, IByteBuffer buffer)
+        {
+            IPEndPoint remoteAddress = NettyUtils.readSocketAddress(buffer);
+            if (null != remoteAddress)
+            {
+                udpSessionRegistry.putSession(remoteAddress.Serialize(), playerSession);
+            }
+        }
 
-    public void setLookupService(LookupService lookupService)
-    {
-        this.lookupService = lookupService;
-    }
+        public ILookupService getLookupService()
+        {
+            return lookupService;
+        }
 
-    public UniqueIDGeneratorService getIdGeneratorService()
-    {
-        return idGeneratorService;
-    }
+        public void setLookupService(ILookupService lookupService)
+        {
+            this.lookupService = lookupService;
+        }
 
-    public void setIdGeneratorService(UniqueIDGeneratorService idGeneratorService)
-    {
-        this.idGeneratorService = idGeneratorService;
-    }
+        public UniqueIDGeneratorService getIdGeneratorService()
+        {
+            return idGeneratorService;
+        }
 
-    public SessionRegistryService<SocketAddress> getUdpSessionRegistry()
-    {
-        return udpSessionRegistry;
-    }
+        public void setIdGeneratorService(UniqueIDGeneratorService idGeneratorService)
+        {
+            this.idGeneratorService = idGeneratorService;
+        }
 
-    public void setUdpSessionRegistry(
-            SessionRegistryService<SocketAddress> udpSessionRegistry)
-    {
-        this.udpSessionRegistry = udpSessionRegistry;
-    }
+        public ISessionRegistryService<SocketAddress> getUdpSessionRegistry()
+        {
+            return udpSessionRegistry;
+        }
 
-    public ReconnectSessionRegistry getReconnectRegistry()
-    {
-        return reconnectRegistry;
-    }
+        public void setUdpSessionRegistry(
+                ISessionRegistryService<SocketAddress> udpSessionRegistry)
+        {
+            this.udpSessionRegistry = udpSessionRegistry;
+        }
 
-    public void setReconnectRegistry(ReconnectSessionRegistry reconnectRegistry)
-    {
-        this.reconnectRegistry = reconnectRegistry;
-    }
+        public ReconnectSessionRegistry getReconnectRegistry()
+        {
+            return reconnectRegistry;
+        }
 
-}
+        public void setReconnectRegistry(ReconnectSessionRegistry reconnectRegistry)
+        {
+            this.reconnectRegistry = reconnectRegistry;
+        }
+
+    }
 
 }

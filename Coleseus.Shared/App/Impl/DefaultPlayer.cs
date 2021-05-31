@@ -1,54 +1,157 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading;
 
 namespace Coleseus.Shared.App.Impl
 {
+
     public class DefaultPlayer : IPlayer
     {
-        public object getId()
+        /**
+         * This variable could be used as a database key.
+         */
+        private Object id;
+
+        /**
+         * The name of the gamer.
+         */
+        private string name;
+        /**
+         * Email id of the gamer.
+         */
+        private string emailId;
+
+        private Mutex mut = new Mutex();
+
+        /**
+         * One player can be connected to multiple games at the same time. Each
+         * session in this set defines a connection to a game. TODO, each player
+         * should not have multiple sessions to the same game.
+         */
+        private HashSet<IPlayerSession> playerSessions;
+
+        public DefaultPlayer()
         {
-            throw new NotImplementedException();
+            playerSessions = new HashSet<IPlayerSession>();
         }
 
-        public void setId(object uniqueKey)
+        public DefaultPlayer(Object id, string name, string emailId) : base()
         {
-            throw new NotImplementedException();
+
+            this.id = id;
+            this.name = name;
+            this.emailId = emailId;
+            playerSessions = new HashSet<IPlayerSession>();
         }
 
-        public string getName()
+
+        public override int GetHashCode()
         {
-            throw new NotImplementedException();
+            int prime = 31;
+            int result = 1;
+            result = prime * result + ((id == null) ? 0 : id.GetHashCode());
+            return result;
         }
 
-        public void setName(string name)
+
+        public override bool Equals(Object obj)
         {
-            throw new NotImplementedException();
+            if (this == obj)
+                return true;
+            if (obj == null)
+                return false;
+            if (GetType() != obj.GetType())
+                return false;
+            DefaultPlayer other = (DefaultPlayer)obj;
+            if (id == null)
+            {
+                if (other.id != null)
+                    return false;
+            }
+            else if (!id.Equals(other.id))
+                return false;
+            return true;
         }
 
-        public string getEmailId()
+
+        public Object getId()
         {
-            throw new NotImplementedException();
+            return id;
         }
 
-        public void setEmailId(string emailId)
+
+        public void setId(Object id)
         {
-            throw new NotImplementedException();
+            this.id = id;
         }
+
+        public String getName()
+        {
+            return name;
+        }
+
+
+        public void setName(String name)
+        {
+            this.name = name;
+        }
+
+
+        public String getEmailId()
+        {
+            return emailId;
+        }
+
+
+        public void setEmailId(String emailId)
+        {
+            this.emailId = emailId;
+        }
+
 
         public bool addSession(IPlayerSession session)
         {
-            throw new NotImplementedException();
+            mut.WaitOne();
+            var result = playerSessions.Add(session);
+            mut.ReleaseMutex();
+            return result;
         }
+
 
         public bool removeSession(IPlayerSession session)
         {
-            throw new NotImplementedException();
+            mut.WaitOne();
+            bool remove = playerSessions.Remove(session);
+            if (playerSessions.Count == 0)
+            {
+                logout(session);
+            }
+            mut.ReleaseMutex();
+            return remove;
         }
 
-        public void logout(IPlayerSession playerSession)
+        public void logout(IPlayerSession session)
         {
-            throw new NotImplementedException();
+            mut.WaitOne();
+            session.close();
+            if (null != playerSessions)
+            {
+                playerSessions.Remove(session);
+            }
+            mut.ReleaseMutex();
         }
+
+        public HashSet<IPlayerSession> getPlayerSessions()
+        {
+            return playerSessions;
+        }
+
+        public void setPlayerSessions(HashSet<IPlayerSession> playerSessions)
+        {
+            this.playerSessions = playerSessions;
+        }
+
     }
+
 }

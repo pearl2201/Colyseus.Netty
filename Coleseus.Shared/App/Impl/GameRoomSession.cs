@@ -1,7 +1,9 @@
 ﻿using Coleseus.Shared.App;
 using Coleseus.Shared.Event;
+using Coleseus.Shared.Event.Impl;
 using Coleseus.Shared.Protocols;
 using Coleseus.Shared.Service;
+using Coleseus.Shared.Service.Impl;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -14,13 +16,13 @@ namespace Coleseus.Shared.App.Impl
     public class GameRoomSessionBuilder : SessionBuilder
     {
 
-        protected HashSet<IPlayerSession> sessions;
-        protected IGame parentGame;
-        protected String gameRoomName;
-        protected IProtocol protocol;
-        protected LaneStrategy<String, ExecutorService, GameRoom> laneStrategy;
-        protected IGameStateManagerService stateManager;
-        protected SessionFactory sessionFactory;
+        public HashSet<IPlayerSession> sessions;
+        public IGame parentGame;
+        public String gameRoomName;
+        public IProtocol protocol;
+        public LaneStrategy<String, ExecutorService, GameRoom> laneStrategy;
+        public IGameStateManagerService stateManager;
+        public SessionFactory sessionFactory;
 
 
         protected void validateAndSetValues()
@@ -28,7 +30,7 @@ namespace Coleseus.Shared.App.Impl
             id = Guid.NewGuid().ToString();
             if (null == sessionAttributes)
             {
-                sessionAttributes = new HashMap<String, Object>();
+                sessionAttributes = new Dictionary<String, Object>();
             }
             if (null == sessions)
             {
@@ -46,7 +48,7 @@ namespace Coleseus.Shared.App.Impl
             {
                 sessionFactory = Sessions.INSTANCE;
             }
-            creationTime = System.currentTimeMillis();
+            creationTime = System.DateTime.UtcNow;
         }
 
         public GameRoomSessionBuilder SetSessions(HashSet<IPlayerSession> sessions)
@@ -95,39 +97,6 @@ namespace Coleseus.Shared.App.Impl
     }
 
 
-    public IPlayerSession createPlayerSession(IPlayer player)
-    {
-        IPlayerSession playerSession = getSessionInstance(player);
-        return playerSession;
-    }
-
-
-    public abstract void onLogin(IPlayerSession playerSession);
-
-
-    public synchronized bool connectSession(IPlayerSession playerSession)
-
-    {
-        if (!isShuttingDown)
-        {
-            playerSession.setStatus(SessionStatus.CONNECTING);
-            sessions.add(playerSession);
-            playerSession.setGameRoom(this);
-            _logger.LogTrace("Protocol to be applied is: {}", protocol.GetType().Name);
-            protocol.applyProtocol(playerSession, true);
-            createAndAddEventHandlers(playerSession);
-            playerSession.setStatus(Session.Status.CONNECTED);
-            afterSessionConnect(playerSession);
-            return true;
-            // TODO send event to all other sessions?
-        }
-        else
-        {
-            LOG.warn("Game Room is shutting down, playerSession {} {}",
-                    playerSession, "will not be connected!");
-            return false;
-        }
-    }
 
 
     public abstract class GameRoomSession : DefaultSession, GameRoom
@@ -210,13 +179,13 @@ namespace Coleseus.Shared.App.Impl
         }
 
 
-        public void sendBroadcast(NetworkEvent networkEvent)
+        public void sendBroadcast(INetworkEvent networkEvent)
         {
             onEvent(networkEvent);
         }
 
 
-        public void close()
+        public override void close()
         {
             mute.WaitOne();
             isShuttingDown = true;
@@ -306,15 +275,7 @@ namespace Coleseus.Shared.App.Impl
         }
 
 
-        public bool isShuttingDown()
-        {
-            return isShuttingDown;
-        }
 
-        public void setShuttingDown(bool isShuttingDown)
-        {
-            this.isShuttingDown = isShuttingDown;
-        }
 
         /**
          * Method which will create and add event handlers of the player session to
@@ -326,7 +287,7 @@ namespace Coleseus.Shared.App.Impl
         protected void createAndAddEventHandlers(IPlayerSession playerSession)
         {
             // Create a network event listener for the player session.
-            EventHandler networkEventHandler = new NetworkEventListener(playerSession);
+            IEventHandler networkEventHandler = new NetworkEventListener(playerSession);
             // Add the handler to the game room's EventDispatcher so that it will
             // pass game room network events to player session session.
             this.eventDispatcher.addHandler(networkEventHandler);
@@ -334,6 +295,41 @@ namespace Coleseus.Shared.App.Impl
                     + "EventDispatcher of GameRoom {}, for session: {}", this,
                     playerSession);
         }
+
+        public IPlayerSession createPlayerSession(IPlayer player)
+        {
+            IPlayerSession playerSession = getSessionInstance(player);
+            return playerSession;
+        }
+
+
+        public abstract void onLogin(IPlayerSession playerSession);
+
+        [MethodImpl(MethodImplOptions.Synchronized)]
+        public bool connectSession(IPlayerSession playerSession)
+
+        {
+            if (!isShuttingDown)
+            {
+                playerSession.status = (SessionStatus.CONNECTING);
+                sessions.Add(playerSession);
+                playerSession.setGameRoom(this);
+                _logger.LogTrace("Protocol to be applied is: {}", protocol.GetType().Name);
+                protocol.applyProtocol(playerSession, true);
+                createAndAddEventHandlers(playerSession);
+                playerSession.status = (SessionStatus.CONNECTED);
+                afterSessionConnect(playerSession);
+                return true;
+                // TODO send event to all other sessions?
+            }
+            else
+            {
+                _logger.LogWarning("Game Room is shutting down, playerSession {} {}",
+                        playerSession, "will not be connected!");
+                return false;
+            }
+        }
+
     }
 
 }

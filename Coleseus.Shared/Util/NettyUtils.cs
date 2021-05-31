@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Text;
 using Serilog;
 using System.Net;
+using Coleseus.Shared.App;
 
 namespace Coleseus.Shared.Util
 {
@@ -20,15 +21,15 @@ namespace Coleseus.Shared.Util
         {
             if (null != messageSender)
             {
-                Channel channel = messageSender.();
-                ChannelPipeline pipeline = channel.pipeline();
+                IChannel channel = messageSender.getChannel();
+                IChannelPipeline pipeline = channel.Pipeline;
                 return pipeline;
             }
             return null;
         }
 
-        public static ChannelPipeline getPipeLineOfConnection(
-                PlayerSession playerSession)
+        public static IChannelPipeline getPipeLineOfConnection(
+                IPlayerSession playerSession)
         {
             return getPipeLineOfConnection((NettyTCPMessageSender)playerSession.getTcpSender());
         }
@@ -38,7 +39,7 @@ namespace Coleseus.Shared.Util
 		 * 
 		 * @param pipeline
 		 */
-        public static void clearPipeline(ChannelPipeline pipeline)
+        public static void clearPipeline(IChannelPipeline pipeline)
         {
             if (null == pipeline)
             {
@@ -48,14 +49,14 @@ namespace Coleseus.Shared.Util
             {
                 int counter = 0;
 
-                while (pipeline.first() != null)
+                while (pipeline.First() != null)
                 {
-                    pipeline.removeFirst();
+                    pipeline.RemoveFirst();
                     counter++;
                 }
                 Log.Verbose("Removed {} handlers from pipeline", counter);
             }
-            catch (NoSuchElementException e)
+            catch (Exception e)
             {
                 // all elements removed.
             }
