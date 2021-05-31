@@ -11,7 +11,7 @@ namespace Coleseus.Shared.Server.Netty
    * @author Abraham Menacherry
    * 
    */
-    public interface NettyServer<T> : IServer where T : IChannel
+    public interface NettyServer : IServer 
     {
         /**
          * createServerBootstrap will create a pipeline factory and save it as a
@@ -20,7 +20,7 @@ namespace Coleseus.Shared.Server.Netty
          * @return Returns the channel pipeline factory that is associated with this
          *         netty server.
          */
-        ChannelInitializer<T> getChannelInitializer() ;
+        IChannelHandler getChannelInitializer();
 
         /**
          * Method can be used to set the pipeline factory that is to be used by the
@@ -30,7 +30,7 @@ namespace Coleseus.Shared.Server.Netty
          *            The factory which will create a pipeline on each incoming
          *            connection.
          */
-        void setChannelInitializer(ChannelInitializer<T> initializer);
+        void setChannelInitializer(IChannelHandler initializer);
 
         /**
          * Get the netty configuration associated with this server.

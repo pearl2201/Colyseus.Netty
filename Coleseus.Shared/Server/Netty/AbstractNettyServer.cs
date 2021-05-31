@@ -11,16 +11,16 @@ using System.Threading.Tasks;
 
 namespace Coleseus.Shared.Server.Netty
 {
-    public abstract class AbstractNettyServer<T> : NettyServer<T> where T : IChannel
+    public abstract class AbstractNettyServer : NettyServer
     {
-        private readonly ILogger<AbstractNettyServer<T>> _logger;
+        private readonly ILogger<AbstractNettyServer> _logger;
         public static IChannelGroup ALL_CHANNELS = new DefaultChannelGroup(new SingleThreadEventExecutor("TcpNettyServer", TimeSpan.FromSeconds(10)));
         protected IGameAdminService gameAdminService;
         protected NettyConfig nettyConfig;
-        protected ChannelInitializer<T> channelInitializer;
+        protected IChannelHandler channelInitializer;
 
         public AbstractNettyServer(NettyConfig nettyConfig,
-                ChannelInitializer<T> channelInitializer)
+               IChannelHandler channelInitializer)
         {
             this.nettyConfig = nettyConfig;
             this.channelInitializer = channelInitializer;
@@ -78,7 +78,7 @@ namespace Coleseus.Shared.Server.Netty
         }
 
 
-        public ChannelInitializer<T> getChannelInitializer()
+        public IChannelHandler getChannelInitializer()
         {
             return channelInitializer;
         }
@@ -126,7 +126,7 @@ namespace Coleseus.Shared.Server.Netty
 
         public abstract TRANSMISSION_PROTOCOL getTransmissionProtocol();
 
-        public void setChannelInitializer(ChannelInitializer<T> initializer)
+        public void setChannelInitializer(IChannelHandler initializer)
         {
             this.channelInitializer = initializer;
         }
