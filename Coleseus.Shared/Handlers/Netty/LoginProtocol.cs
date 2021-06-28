@@ -1,4 +1,6 @@
-﻿using DotNetty.Buffers;
+﻿using Coleseus.Shared.Event;
+using DotNetty.Buffers;
+using DotNetty.Codecs;
 using DotNetty.Codecs.Http;
 using DotNetty.Codecs.Http.WebSockets;
 using DotNetty.Transport.Channels;
@@ -111,7 +113,7 @@ namespace Coleseus.Shared.Handlers.Netty
 	 * @author Abraham Menacherry
 	 * 
 	 */
-    public static class DefaultNadProtocol : LoginProtocol
+    public class DefaultNadProtocol : LoginProtocol
     {
 
         private int frameSize = 1024;
@@ -119,31 +121,31 @@ namespace Coleseus.Shared.Handlers.Netty
         private LoginHandler loginHandler;
         private LengthFieldPrepender lengthFieldPrepender;
 
-        @Override
-        public boolean applyProtocol(IByteBuffer buffer,
-                ChannelPipeline pipeline)
+
+        public override bool applyProtocol(IByteBuffer buffer,
+                IChannelPipeline pipeline)
         {
-            boolean isThisProtocol = false;
-            final int opcode = buffer.getUnsignedByte(buffer.readerIndex() + 2);
-            final int protocolVersion = buffer.getUnsignedByte(buffer
-                    .readerIndex() + 3);
+            bool isThisProtocol = false;
+            int opcode = buffer.GetByte(buffer.ReaderIndex + 2);
+            int protocolVersion = buffer.GetByte(buffer
+                   .ReaderIndex + 3);
             if (isNadProtocol(opcode, protocolVersion))
             {
-                pipeline.addLast("framer", createLengthBasedFrameDecoder());
-                pipeline.addLast("eventDecoder", eventDecoder);
-                pipeline.addLast(LOGIN_HANDLER_NAME, loginHandler);
-                pipeline.addLast("lengthFieldPrepender", lengthFieldPrepender);
+                pipeline.AddLast("framer", createLengthBasedFrameDecoder());
+                pipeline.AddLast("eventDecoder", eventDecoder);
+                pipeline.AddLast(LOGIN_HANDLER_NAME, loginHandler);
+                pipeline.AddLast("lengthFieldPrepender", lengthFieldPrepender);
                 isThisProtocol = true;
             }
             return isThisProtocol;
         }
 
-        protected boolean isNadProtocol(int magic1, int magic2)
+        protected bool isNadProtocol(int magic1, int magic2)
         {
-            return ((magic1 == LOG_IN || magic1 == RECONNECT) && magic2 == PROTCOL_VERSION);
+            return ((magic1 == Events.LOG_IN || magic1 == Events.RECONNECT) && magic2 == Events.PROTCOL_VERSION);
         }
 
-        public ChannelHandler createLengthBasedFrameDecoder()
+        public IChannelHandler createLengthBasedFrameDecoder()
         {
             return new LengthFieldBasedFrameDecoder(frameSize, 0, 2, 0, 2);
         }
@@ -190,26 +192,12 @@ namespace Coleseus.Shared.Handlers.Netty
         }
     }
 
-    public static class CompositeProtocol : LoginProtocol
+    public class CompositeProtocol : LoginProtocol
     {
         private List<LoginProtocol> protocols;
 
-        @Override
-            public boolean applyProtocol(IByteBuffer buffer,
-                    ChannelPipeline pipeline)
-        {
-            if (null != protocols)
-            {
-                for (LoginProtocol protocol : protocols)
-                {
-                    if (protocol.applyProtocol(buffer, pipeline))
-                    {
-                        return true;
-                    }
-                }
-            }
-            return false;
-        }
+
+      
 
         public List<LoginProtocol> getProtocols()
         {
@@ -219,6 +207,21 @@ namespace Coleseus.Shared.Handlers.Netty
         public void setProtocols(List<LoginProtocol> protocols)
         {
             this.protocols = protocols;
+        }
+
+        public override bool applyProtocol(IByteBuffer buffer, IChannelPipeline pipeline)
+        {
+            if (null != protocols)
+            {
+                foreach (LoginProtocol protocol in protocols)
+                {
+                    if (protocol.applyProtocol(buffer, pipeline))
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
         }
     }
 }

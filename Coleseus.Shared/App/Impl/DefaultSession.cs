@@ -1,5 +1,6 @@
 ﻿using Coleseus.Shared.Communication;
 using Coleseus.Shared.Event;
+using Coleseus.Shared.Event.Impl;
 using Coleseus.Shared.Service;
 using Coleseus.Shared.Service.Impl;
 using System;

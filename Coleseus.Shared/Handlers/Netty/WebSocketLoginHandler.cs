@@ -1,7 +1,10 @@
-﻿using Coleseus.Shared.App;
+﻿using AutoMapper;
+using Coleseus.Shared.App;
+using Coleseus.Shared.Communication;
 using Coleseus.Shared.Event;
 using Coleseus.Shared.Event.Impl;
 using Coleseus.Shared.Service;
+using Coleseus.Shared.Service.Impl;
 using DotNetty.Codecs.Http.WebSockets;
 using DotNetty.Transport.Channels;
 using Microsoft.Extensions.Logging;
@@ -10,6 +13,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Coleseus.Shared.Handlers.Netty
 {
@@ -28,11 +32,11 @@ namespace Coleseus.Shared.Handlers.Netty
 
         private readonly ILogger<WebSocketLoginHandler> _logger;
 
-        private LookupService lookupService;
+        private ILookupService lookupService;
         protected ReconnectSessionRegistry reconnectRegistry;
         protected UniqueIDGeneratorService idGeneratorService;
 
-        private ObjectMapper jackson;
+        private IMapper jackson;
 
 
         protected override void ChannelRead0(IChannelHandlerContext ctx,
@@ -49,9 +53,9 @@ namespace Coleseus.Shared.Handlers.Netty
                 _logger.LogTrace("Login attempt from {}", channel.RemoteAddress);
                 List<String> credList = null;
                 credList = (List<string>)@event.getSource();
-                IPlayer player = lookupPlayer(credList.get(0), credList.get(1));
+                IPlayer player = lookupPlayer(credList[0], credList[1]);
                 handleLogin(player, channel);
-                handleGameRoomJoin(player, channel, credList.get(2));
+                handleGameRoomJoin(player, channel, credList[2]);
             }
             else if (type == Events.RECONNECT)
 
@@ -59,7 +63,7 @@ namespace Coleseus.Shared.Handlers.Netty
                 _logger.LogDebug("Reconnect attempt from {}", channel.RemoteAddress);
                 IPlayerSession playerSession = lookupSession((string)@event.getSource());
                 var task = handleReconnect(playerSession, channel);
-                task.
+
             }
 
             else
@@ -80,7 +84,8 @@ namespace Coleseus.Shared.Handlers.Netty
             IPlayerSession playerSession = (IPlayerSession)reconnectRegistry.getSession(reconnectKey);
             if (null != playerSession)
             {
-                synchronized(playerSession){
+                lock (playerSession)
+                {
                     // if its an already active session then do not allow a
                     // reconnect. So the only state in which a client is allowed to
                     // reconnect is if it is "NOT_CONNECTED"
@@ -142,7 +147,7 @@ namespace Coleseus.Shared.Handlers.Netty
             return player;
         }
 
-        public async Task handleLogin(IPlayer player, IChannel channel)
+        public async Gjob handleLogin(IPlayer player, IChannel channel)
         {
             if (null != player)
 
@@ -160,8 +165,7 @@ namespace Coleseus.Shared.Handlers.Netty
         protected async Task closeChannelWithLoginFailure(IChannel channel)
         {
             // Close the connection as soon as the error message is sent.
-            await channel.WriteAndFlushAsync(eventToFrame(Events.LOG_IN_FAILURE, null)).addListener(
-                        ChannelFutureListener.CLOSE);
+            await channel.WriteAndFlushAsync(eventToFrame(Events.LOG_IN_FAILURE, null));
         }
 
         public void handleGameRoomJoin(IPlayer player, IChannel channel, string refKey)
@@ -173,8 +177,8 @@ namespace Coleseus.Shared.Handlers.Netty
                 IPlayerSession playerSession = gameRoom.createPlayerSession(player);
                 String reconnectKey = (String)idGeneratorService
                         .generateFor(playerSession.getClass());
-                playerSession.setAttribute(NadronConfig.RECONNECT_KEY, reconnectKey);
-                playerSession.setAttribute(NadronConfig.RECONNECT_REGISTRY, reconnectRegistry);
+                playerSession.setAttribute(ColyseusConfig.RECONNECT_KEY, reconnectKey);
+                playerSession.setAttribute(ColyseusConfig.RECONNECT_REGISTRY, reconnectRegistry);
                 _logger.LogTrace("Sending GAME_ROOM_JOIN_SUCCESS to channel {}",
                         channel);
                 var task = channel.WriteAndFlushAsync(eventToFrame(
@@ -197,24 +201,13 @@ namespace Coleseus.Shared.Handlers.Netty
         public void connectToGameRoom(GameRoom gameRoom,
                  IPlayerSession playerSession, Task future)
         {
-            
-            future.addListener(new ChannelFutureListener()
-            {
-
-
-
-            public void operationComplete(ChannelFuture future)
-
-
-
-
-
+            future.ContinueWith((x) =>
             {
                 Channel channel = future.channel();
                 _logger.LogTrace(
                         "Sending GAME_ROOM_JOIN_SUCCESS to channel {} completed",
                         channel);
-                if (future.isSuccess())
+                if (x.Status == TaskStatus.RanToCompletion)
                 {
                     // Set the tcp channel on the session.
                     NettyTCPMessageSender tcpSender = new NettyTCPMessageSender(
@@ -231,54 +224,55 @@ namespace Coleseus.Shared.Handlers.Netty
                     _logger.LogError("Sending GAME_ROOM_JOIN_SUCCESS message to client was failure, channel will be closed");
                     channel.close();
                 }
-            }
-        });
+            });
+
+
         }
 
-    protected TextWebSocketFrame eventToFrame(byte opcode, Object payload)
-    {
-        IEvent @event = Events.CreateEvent(payload, opcode);
-        return new TextWebSocketFrame(JsonConvert.SerializeObject(@event));
-    }
+        protected TextWebSocketFrame eventToFrame(byte opcode, Object payload)
+        {
+            IEvent @event = Events.CreateEvent(payload, opcode);
+            return new TextWebSocketFrame(JsonConvert.SerializeObject(@event));
+        }
 
-    public LookupService getLookupService()
-    {
-        return lookupService;
-    }
+        public ILookupService getLookupService()
+        {
+            return lookupService;
+        }
 
-    public void setLookupService(LookupService lookupService)
-    {
-        this.lookupService = lookupService;
-    }
+        public void setLookupService(ILookupService lookupService)
+        {
+            this.lookupService = lookupService;
+        }
 
-    public ReconnectSessionRegistry getReconnectRegistry()
-    {
-        return reconnectRegistry;
-    }
+        public ReconnectSessionRegistry getReconnectRegistry()
+        {
+            return reconnectRegistry;
+        }
 
-    public void setReconnectRegistry(ReconnectSessionRegistry reconnectRegistry)
-    {
-        this.reconnectRegistry = reconnectRegistry;
-    }
+        public void setReconnectRegistry(ReconnectSessionRegistry reconnectRegistry)
+        {
+            this.reconnectRegistry = reconnectRegistry;
+        }
 
-    public UniqueIDGeneratorService getIdGeneratorService()
-    {
-        return idGeneratorService;
-    }
+        public UniqueIDGeneratorService getIdGeneratorService()
+        {
+            return idGeneratorService;
+        }
 
-    public void setIdGeneratorService(UniqueIDGeneratorService idGeneratorService)
-    {
-        this.idGeneratorService = idGeneratorService;
-    }
+        public void setIdGeneratorService(UniqueIDGeneratorService idGeneratorService)
+        {
+            this.idGeneratorService = idGeneratorService;
+        }
 
-    public ObjectMapper getJackson()
-    {
-        return jackson;
-    }
+        public ObjectMapper getJackson()
+        {
+            return jackson;
+        }
 
-    public void setJackson(ObjectMapper jackson)
-    {
-        this.jackson = jackson;
+        public void setJackson(ObjectMapper jackson)
+        {
+            this.jackson = jackson;
+        }
     }
-}
 }

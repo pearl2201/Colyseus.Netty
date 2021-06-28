@@ -25,15 +25,15 @@ namespace Coleseus.Shared.Communication
     {
 
         private readonly ILogger<NettyUDPMessageSender> _logger;
-        private SocketAddress remoteAddress;
+        private EndPoint remoteAddress;
         private IDatagramChannel channel;
-        private ISessionRegistryService<SocketAddress> sessionRegistryService;
+        private ISessionRegistryService<EndPoint> sessionRegistryService;
         private IEventContext eventContext;
         private const DeliveryGuaranty DELIVERY_GUARANTY = DeliveryGuaranty.FAST;
 
-        public NettyUDPMessageSender(SocketAddress remoteAddress,
+        public NettyUDPMessageSender(EndPoint remoteAddress,
                 IDatagramChannel channel,
-                ISessionRegistryService<SocketAddress> sessionRegistryService)
+                ISessionRegistryService<EndPoint> sessionRegistryService)
         {
             this.remoteAddress = remoteAddress;
             this.channel = channel;
@@ -74,7 +74,7 @@ namespace Coleseus.Shared.Communication
 
         }
 
-        public SocketAddress getRemoteAddress()
+        public EndPoint getRemoteAddress()
         {
             return remoteAddress;
         }
@@ -101,17 +101,17 @@ namespace Coleseus.Shared.Communication
             return sender;
         }
 
-        protected ISessionRegistryService<SocketAddress> getSessionRegistryService()
+        protected ISessionRegistryService<EndPoint> getSessionRegistryService()
         {
             return sessionRegistryService;
         }
 
         protected class EventContextImpl : IEventContext
         {
-            SocketAddress clientAddress;
-            public EventContextImpl(SocketAddress clientAddress)
+            EndPoint clientAddress;
+            public EventContextImpl(EndPoint clientAddress)
             {
-                this.clientAddress = (SocketAddress)clientAddress;
+                this.clientAddress = (EndPoint)clientAddress;
             }
 
             public ISession getSession()

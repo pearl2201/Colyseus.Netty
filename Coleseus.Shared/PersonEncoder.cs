@@ -23,10 +23,10 @@ namespace Colyseus.Common
         {
             if (person is null)
                 return;
-            ByteBuf
-            var message = $"{person.Name}|{person.Age}" + Environment.NewLine;
+            //ByteBuf
+            //var message = $"{person.Name}|{person.Age}" + Environment.NewLine;
 
-            output.Add(ByteBufferUtil.EncodeString(ctx.Allocator, message, _encoding));
+            //output.Add(ByteBufferUtil.EncodeString(ctx.Allocator, message, _encoding));
         }
 
         public override bool IsSharable => true;

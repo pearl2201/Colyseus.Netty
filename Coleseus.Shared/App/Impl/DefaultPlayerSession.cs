@@ -1,4 +1,5 @@
 ﻿using Coleseus.Shared.Event;
+using Coleseus.Shared.Event.Impl;
 using Coleseus.Shared.Protocols;
 using System;
 using System.Collections.Generic;
@@ -126,7 +127,7 @@ namespace Coleseus.Shared.App.Impl
         }
 
 
-        protected override void validateAndSetValues()
+        public override void validateAndSetValues()
         {
             if (null == eventDispatcher)
             {

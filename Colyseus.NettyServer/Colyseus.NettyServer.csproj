@@ -23,8 +23,4 @@
   <ItemGroup>
     <ProjectReference Include="..\Coleseus.Shared\Coleseus.Shared.csproj" />
   </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Matchmaker\" />
-  </ItemGroup>
 </Project>
