@@ -81,7 +81,7 @@ namespace Coleseus.Shared.Event
 
         public static IEvent CreateEvent(Object source, int eventType)
         {
-            return CreateEvent(source, eventType, (Session)null);
+            return CreateEvent(source, eventType, (ISession)null);
         }
 
         public static IEvent CreateEvent(Object source, int eventType, ISession session)
@@ -102,7 +102,7 @@ namespace Coleseus.Shared.Event
             @event.setSource(source);
             @event.setType(eventType);
             @event.setEventContext(context);
-            @event.setTimeStamp(System.DateTime.UtcNow.Millisecond);
+            @event.setTimeStamp(System.DateTime.UtcNow);
             return @event;
         }
 
@@ -117,9 +117,9 @@ namespace Coleseus.Shared.Event
          *            transmitted to remote machine.
          * @return An instance of {@link NetworkEvent}
          */
-        public static INetworkEvent networkEvent(Object source)
+        public static INetworkEvent NetworkEvent(Object source)
         {
-            return networkEvent(source, DeliveryGuaranty.RELIABLE);
+            return NetworkEvent(source, DeliveryGuaranty.RELIABLE);
         }
 
         /**
@@ -138,7 +138,7 @@ namespace Coleseus.Shared.Event
         public static INetworkEvent NetworkEvent(Object source, DeliveryGuaranty deliveryGuaranty)
         {
             IEvent @event = CreateEvent(source, Events.NETWORK_MESSAGE);
-            INetworkEvent networkEvent = new Events(@event);
+            INetworkEvent networkEvent = new DefaultNetworkEvent(@event);
             networkEvent.setDeliveryGuaranty(deliveryGuaranty);
             return networkEvent;
         }
@@ -146,21 +146,21 @@ namespace Coleseus.Shared.Event
         public static IEvent connectEvent(Reliable tcpSender)
         {
             IEvent @event = new DefaultConnectEvent(tcpSender);
-            @event.setTimeStamp(System.currentTimeMillis());
+            @event.setTimeStamp(System.DateTime.UtcNow-);
             return @event;
         }
 
         public static IEvent connectEvent(Fast udpSender)
         {
             IEvent @event = new DefaultConnectEvent(udpSender);
-            @event.setTimeStamp(System.currentTimeMillis());
+            @event.setTimeStamp(System.DateTime.UtcNow);
             return @event;
         }
 
         public static IEvent connectEvent(Reliable tcpSender, Fast udpSender)
         {
             IEvent @event = new DefaultConnectEvent(tcpSender, udpSender);
-            @event.setTimeStamp(System.currentTimeMillis());
+            @event.setTimeStamp(System.DateTime.UtcNow);
             return @event;
         }
 

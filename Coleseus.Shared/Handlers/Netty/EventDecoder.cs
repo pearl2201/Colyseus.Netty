@@ -8,10 +8,10 @@ using System.Text;
 
 namespace Coleseus.Shared.Handlers.Netty
 {
-    public class EventDecoder : MessageToMessageDecoder<IIByteBufferfer>
+    public class EventDecoder : MessageToMessageDecoder<IByteBuffer>
     {
 
-        protected override void Decode(IChannelHandlerContext ctx, IIByteBufferfer msg,
+        protected override void Decode(IChannelHandlerContext ctx, IByteBuffer msg,
                 List<Object> @out)
         {
             int opcode = msg.ReadByte();
@@ -19,7 +19,7 @@ namespace Coleseus.Shared.Handlers.Netty
             {
                 msg.ReadByte();// To read-destroy the protocol version byte.
             }
-            IIByteBufferfer buffer = msg.ReadBytes(msg.ReadableBytes);
+            IByteBuffer buffer = msg.ReadBytes(msg.ReadableBytes);
             @out.Add(Events.CreateEvent(buffer, opcode));
         }
 
