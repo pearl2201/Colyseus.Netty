@@ -30,7 +30,7 @@ namespace Coleseus.Shared.Handlers.Netty
     public class WebSocketLoginHandler : SimpleChannelInboundHandler<TextWebSocketFrame>
     {
 
-        private readonly ILogger<WebSocketLoginHandler> _logger;
+        private readonly Serilog.ILogger _logger = Serilog.Log.ForContext<WebSocketLoginHandler>();
 
         private ILookupService lookupService;
         protected ReconnectSessionRegistry reconnectRegistry;
@@ -44,13 +44,13 @@ namespace Coleseus.Shared.Handlers.Netty
         {
             IChannel channel = ctx.Channel;
             string data = frame.Text();
-            _logger.LogTrace("From websocket: " + data);
+            _logger.Verbose("From websocket: " + data);
             IEvent @event = JsonConvert.DeserializeObject<DefaultEvent>(data);
             int type = @event.getType();
             if (Events.LOG_IN == type)
 
             {
-                _logger.LogTrace("Login attempt from {}", channel.RemoteAddress);
+                _logger.Verbose("Login attempt from {}", channel.RemoteAddress);
                 List<String> credList = null;
                 credList = (List<string>)@event.getSource();
                 IPlayer player = lookupPlayer(credList[0], credList[1]);
@@ -60,7 +60,7 @@ namespace Coleseus.Shared.Handlers.Netty
             else if (type == Events.RECONNECT)
 
             {
-                _logger.LogDebug("Reconnect attempt from {}", channel.RemoteAddress);
+                _logger.Debug("Reconnect attempt from {}", channel.RemoteAddress);
                 IPlayerSession playerSession = lookupSession((string)@event.getSource());
                 var task = handleReconnect(playerSession, channel);
 
@@ -69,7 +69,7 @@ namespace Coleseus.Shared.Handlers.Netty
             else
 
             {
-                _logger.LogError(
+                _logger.Error(
                         "Invalid event {} sent from remote address {}. "
                                 + "Going to close channel {}",
                         new Object[] { @event.GetType(),
@@ -142,7 +142,7 @@ namespace Coleseus.Shared.Handlers.Netty
             IPlayer player = lookupService.playerLookup(credentials);
             if (null == player)
             {
-                _logger.LogError("Invalid credentials provided by user: {}", credentials);
+                _logger.Error("Invalid credentials provided by user: {}", credentials);
             }
             return player;
         }
@@ -179,7 +179,7 @@ namespace Coleseus.Shared.Handlers.Netty
                         .generateFor(playerSession.GetType());
                 playerSession.setAttribute(ColyseusConfig.RECONNECT_KEY, reconnectKey);
                 playerSession.setAttribute(ColyseusConfig.RECONNECT_REGISTRY, reconnectRegistry);
-                _logger.LogTrace("Sending GAME_ROOM_JOIN_SUCCESS to channel {}",
+                _logger.Verbose("Sending GAME_ROOM_JOIN_SUCCESS to channel {}",
                         channel);
                 var task = channel.WriteAndFlushAsync(eventToFrame(
                         Events.GAME_ROOM_JOIN_SUCCESS, reconnectKey));
@@ -191,7 +191,7 @@ namespace Coleseus.Shared.Handlers.Netty
                 // Write failure and close channel.
                 channel.WriteAndFlushAsync(eventToFrame(
                         Events.GAME_ROOM_JOIN_FAILURE, null)).Wait();
-                _logger.LogError(
+                _logger.Error(
                         "Invalid ref key provided by client: {}. Channel {} will be closed",
                         refKey, channel);
             }
@@ -203,7 +203,7 @@ namespace Coleseus.Shared.Handlers.Netty
             future.ContinueWith((x) =>
             {
                
-                _logger.LogTrace(
+                _logger.Verbose(
                         "Sending GAME_ROOM_JOIN_SUCCESS to channel {} completed",
                         channel);
                 if (x.Status == TaskStatus.RanToCompletion)
@@ -220,7 +220,7 @@ namespace Coleseus.Shared.Handlers.Netty
                 }
                 else
                 {
-                    _logger.LogError("Sending GAME_ROOM_JOIN_SUCCESS message to client was failure, channel will be closed");
+                    _logger.Error("Sending GAME_ROOM_JOIN_SUCCESS message to client was failure, channel will be closed");
                     channel.CloseAsync().Wait();
                 }
             });

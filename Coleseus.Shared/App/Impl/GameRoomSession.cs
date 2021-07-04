@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
+using Serilog;
 
 namespace Coleseus.Shared.App.Impl
 {
@@ -92,7 +93,7 @@ namespace Coleseus.Shared.App.Impl
 
     public abstract class GameRoomSession : DefaultSession, GameRoom
     {
-        private ILogger<GameRoomSession> _logger;
+        protected Serilog.ILogger _logger;
 
         /**
          * The name of the game room, preferably unique across multiple games.
@@ -133,7 +134,7 @@ namespace Coleseus.Shared.App.Impl
             this.protocol = gameRoomSessionBuilder.protocol;
             this.stateManager = gameRoomSessionBuilder.stateManager;
             this.sessionFactory = gameRoomSessionBuilder.sessionFactory;
-
+            this._logger = Serilog.Log.ForContext<GameRoomSession>();
             if (null == gameRoomSessionBuilder.eventDispatcher)
             {
                 this.eventDispatcher = new ExecutorEventDispatcher();
@@ -283,7 +284,7 @@ namespace Coleseus.Shared.App.Impl
             // Add the handler to the game room's EventDispatcher so that it will
             // pass game room network events to player session session.
             this.eventDispatcher.addHandler(networkEventHandler);
-            _logger.LogTrace("Added Network handler to "
+            _logger.Verbose("Added Network handler to "
                     + "EventDispatcher of GameRoom {}, for session: {}", this,
                     playerSession);
         }
@@ -306,7 +307,7 @@ namespace Coleseus.Shared.App.Impl
                 playerSession.status = (SessionStatus.CONNECTING);
                 sessions.Add(playerSession);
                 playerSession.setGameRoom(this);
-                _logger.LogTrace("Protocol to be applied is: {}", protocol.GetType().Name);
+                _logger.Verbose("Protocol to be applied is: {}", protocol.GetType().Name);
                 protocol.applyProtocol(playerSession, true);
                 createAndAddEventHandlers(playerSession);
                 playerSession.status = (SessionStatus.CONNECTED);
@@ -316,7 +317,7 @@ namespace Coleseus.Shared.App.Impl
             }
             else
             {
-                _logger.LogWarning("Game Room is shutting down, playerSession {} {}",
+                _logger.Warning("Game Room is shutting down, playerSession {} {}",
                         playerSession, "will not be connected!");
                 return false;
             }

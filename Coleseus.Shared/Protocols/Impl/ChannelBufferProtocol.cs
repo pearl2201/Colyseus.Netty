@@ -12,7 +12,9 @@ namespace Coleseus.Shared.Protocols.Impl
 {
     public class ChannelBufferProtocol : AbstractNettyProtocol
     {
-        private readonly ILogger<ChannelBufferProtocol> _logger;
+        
+
+        private readonly Serilog.ILogger _logger = Serilog.Log.ForContext<ChannelBufferProtocol>();
         /**
          * Utility handler provided by netty to add the length of the outgoing
          * message to the message as a header.
@@ -29,7 +31,7 @@ namespace Coleseus.Shared.Protocols.Impl
 
         public override void applyProtocol(IPlayerSession playerSession)
         {
-            _logger.LogTrace("Going to apply {} on session: {}", getProtocolName(),
+            _logger.Verbose("Going to apply {} on session: {}", getProtocolName(),
                     playerSession);
 
             IChannelPipeline pipeline = NettyUtils
@@ -39,7 +41,7 @@ namespace Coleseus.Shared.Protocols.Impl
             pipeline.AddLast("lengthDecoder", createLengthBasedFrameDecoder());
             pipeline.AddLast("eventDecoder", eventDecoder);
             pipeline.AddLast("eventHandler", new DefaultToServerHandler(
-                    playerSession,_logger));
+                    playerSession));
 
             // Downstream handlers - Filter for data which flows from server to
             // client. Note that the last handler added is actually the first

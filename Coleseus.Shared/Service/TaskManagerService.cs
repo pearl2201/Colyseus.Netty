@@ -22,7 +22,7 @@ namespace Coleseus.Shared.Service
 	 */
     public interface TaskManagerService
     {
-        void execute(Gjob task);
+        void execute(ScheduleTask task);
 
         /**
 		 * Creates and executes a one-shot action that becomes enabled after the given delay.
@@ -33,7 +33,7 @@ namespace Coleseus.Shared.Service
 		 *         to cancel it, get completed status etc.
 		 */
 
-        Task schedule(Gjob task, long delay, TimeUnit unit);
+        Task schedule(ScheduleTask task, long delay, TimeUnit unit);
 
         /**
 		 * Creates and executes a periodic action that becomes enabled first after
@@ -53,7 +53,7 @@ namespace Coleseus.Shared.Service
 		 *         to cancel it, get completed status etc.
 		 */
 
-        Task scheduleAtFixedRate(Gjob task, long initialDelay,
+        Task scheduleAtFixedRate(ScheduleTask task, long initialDelay,
            long period, TimeUnit unit);
 
         /**
@@ -73,7 +73,7 @@ namespace Coleseus.Shared.Service
 		 *         to cancel it, get completed status etc.
 		 */
 
-        Task scheduleWithFixedDelay(Gjob task,
+        Task scheduleWithFixedDelay(ScheduleTask task,
            long initialDelay, long delay, TimeUnit unit);
 
     }

@@ -23,7 +23,7 @@ namespace Coleseus.Shared.Event.Impl
   */
     public class DefaultSessionEventHandler : SessionEventHandler
     {
-        private readonly ILogger<DefaultSessionEventHandler> _logger;
+        private readonly Serilog.ILogger _logger = Serilog.Log.ForContext<DefaultSessionEventHandler>();
 
         private readonly ISession session;
 
@@ -122,7 +122,7 @@ namespace Coleseus.Shared.Event.Impl
                 }
                 else
                 {
-                    _logger.LogTrace(
+                    _logger.Verbose(
                             "Going to discard event: {} since udpSender is null in session: {}",
                             @event, session);
                 }
@@ -202,7 +202,7 @@ namespace Coleseus.Shared.Event.Impl
 
         protected void onDisconnect(IEvent @event)
         {
-            _logger.LogDebug("Received disconnect event in session. ");
+            _logger.Debug("Received disconnect event in session. ");
             onException(@event);
         }
 
@@ -229,13 +229,13 @@ namespace Coleseus.Shared.Event.Impl
                 {
                     registry.putSession(
                             reconnectKey, getSession());
-                    _logger.LogDebug("Received exception/disconnect event in session. "
+                    _logger.Debug("Received exception/disconnect event in session. "
                         + "Going to put session in reconnection registry");
                 }
             }
             else
             {
-                _logger.LogDebug("Received exception/disconnect event in session. "
+                _logger.Debug("Received exception/disconnect event in session. "
                         + "Going to close session");
                 onClose(@event);
             }
@@ -268,7 +268,7 @@ namespace Coleseus.Shared.Event.Impl
 
         private void logNullTcpConnection(IEvent @event)
         {
-            _logger.LogWarning("Discarding {} as TCP connection is not fully "
+            _logger.Warning("Discarding {} as TCP connection is not fully "
                     + "established for this {}", @event, getSession());
         }
     }

@@ -23,5 +23,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Coleseus.Shared\Coleseus.Shared.csproj" />
+    <ProjectReference Include="..\FossilDelta\FossilDelta.csproj" />
+    <ProjectReference Include="..\GameDevWare.Serialization/GameDevWare.Serialization.csproj" />
   </ItemGroup>
 </Project>

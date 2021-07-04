@@ -14,11 +14,12 @@ namespace Coleseus.Shared.Server.Netty
         private readonly NettyTCPServer _tcpServer;
         private readonly NettyUDPServer _udpServer;
 
-        public ServerManagerImpl(NettyTCPServer tcpServer, NettyUDPServer udpServer )
+        public ServerManagerImpl(NettyTCPServer tcpServer, NettyUDPServer udpServer,ILogger<ServerManagerImpl> logger )
         {
             servers = new HashSet<AbstractNettyServer>();
             _tcpServer = tcpServer;
             _udpServer = udpServer;
+            _logger = logger;
         }
 
 

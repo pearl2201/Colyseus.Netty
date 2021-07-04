@@ -12,13 +12,12 @@ namespace Coleseus.Shared.Handlers.Netty
     public class DefaultToServerHandler : SimpleChannelInboundHandler<IEvent>
     {
         private IPlayerSession playerSession;
-        private readonly ILogger _logger;
+        private readonly Serilog.ILogger _logger = Serilog.Log.ForContext<DefaultToServerHandler>();
 
-        public DefaultToServerHandler(IPlayerSession playerSession, ILogger logger) :base()
+        public DefaultToServerHandler(IPlayerSession playerSession) :base()
         {
     
             this.playerSession = playerSession;
-            _logger = logger;
         }
 
         protected override void ChannelRead0(IChannelHandlerContext ctx, IEvent msg)
@@ -29,7 +28,7 @@ namespace Coleseus.Shared.Handlers.Netty
 
         public override void ExceptionCaught(IChannelHandlerContext ctx, Exception exception)
         {
-            _logger.LogError("Exception during network communication: {}.", exception);
+            _logger.Error("Exception during network communication: {}.", exception);
             IEvent @event = Events.CreateEvent(exception, Events.EXCEPTION);
             playerSession.onEvent(@event);
         }
@@ -37,7 +36,7 @@ namespace Coleseus.Shared.Handlers.Netty
 
         public override void ChannelInactive(IChannelHandlerContext ctx)
         {
-            _logger.LogDebug("Netty Channel {} is closed.", ctx.Channel);
+            _logger.Debug("Netty Channel {} is closed.", ctx.Channel);
             if (!playerSession.isShuttingDown)
             {
                 // Should not send close to session, since reconnection/other
@@ -52,7 +51,7 @@ namespace Coleseus.Shared.Handlers.Netty
         {
             if (evt is IdleStateEvent)
             {
-                _logger.LogWarning(
+                _logger.Warning(
                         "Channel {} has been idle, exception event will be raised now: ",
                         ctx.Channel);
                 // TODO check if setting payload as non-throwable cause issue?

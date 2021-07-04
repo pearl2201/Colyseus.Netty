@@ -15,7 +15,8 @@ namespace Coleseus.Shared.Handlers.Netty
 {
     public class UDPUpstreamHandler : SimpleChannelInboundHandler<DatagramPacket>
     {
-        private readonly ILogger<UDPUpstreamHandler> _logger;
+        
+        private readonly Serilog.ILogger _logger = Serilog.Log.ForContext<UDPUpstreamHandler>();
         private const string UDP_CONNECTING = "UDP_CONNECTING";
         private ISessionRegistryService<EndPoint> udpSessionRegistry;
         private MessageBufferEventDecoder messageBufferEventDecoder;
@@ -55,7 +56,7 @@ namespace Coleseus.Shared.Handlers.Netty
                     }
                     else
                     {
-                        _logger.LogInformation("Going to discard UDP Message Event with type {} "
+                        _logger.Information("Going to discard UDP Message Event with type {} "
                                 + "the UDP MessageSender is not initialized fully",
                                 @event.getType());
                     }
@@ -65,7 +66,7 @@ namespace Coleseus.Shared.Handlers.Netty
 
                 {
                     // Duplicate connect just discard.
-                    _logger.LogTrace("Duplicate CONNECT {} received in UDP channel, "
+                    _logger.Verbose("Duplicate CONNECT {} received in UDP channel, "
                             + "for session: {} going to discard", @event, session);
                 }
 
@@ -79,7 +80,7 @@ namespace Coleseus.Shared.Handlers.Netty
 
             else
             {
-                _logger.LogTrace(
+                _logger.Verbose(
                         "Packet received from unknown source address: {}, going to discard",
                         remoteAddress);
             }
@@ -88,12 +89,12 @@ namespace Coleseus.Shared.Handlers.Netty
         public IEvent getUDPConnectEvent(IEvent @event, EndPoint remoteAddress,
                 SocketDatagramChannel udpChannel)
         {
-            _logger.LogDebug("Incoming udp connection remote address : {}",
+            _logger.Debug("Incoming udp connection remote address : {}",
                     remoteAddress);
 
             if (@event.getType() != Events.CONNECT)
             {
-                _logger.LogInformation("UDP Event with type {} will get converted to a CONNECT "
+                _logger.Information("UDP Event with type {} will get converted to a CONNECT "
                         + "event since the UDP MessageSender is not initialized till now",
                                 @event.getType());
             }

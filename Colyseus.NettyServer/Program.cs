@@ -1,3 +1,5 @@
+using Coleseus.Shared.Server;
+using Coleseus.Shared.Server.Netty;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Samples.Akka.AspNetCore.Actors;
@@ -32,6 +34,10 @@ namespace Colyseus.NettyServer
                 .ConfigureServices((hostContext, services) =>
                 {
                     services.AddHostedService<Worker>();
+                    services.AddHostedService<GammeServerWorker>();
+                    services.AddSingleton<NettyTCPServer>();
+                    services.AddSingleton<NettyUDPServer>();
+                    services.AddSingleton<ServerManager,ServerManagerImpl>();
                     // set up a simple service we're going to hash
                     services.AddScoped<IHashService, HashServiceImpl>();
 

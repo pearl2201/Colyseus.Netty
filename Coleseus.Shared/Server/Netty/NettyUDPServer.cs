@@ -19,12 +19,12 @@ namespace Coleseus.Shared.Server.Netty
 	 */
     public class NettyUDPServer : AbstractNettyServer
     {
-        private readonly ILogger<NettyUDPServer> _logger;
+        
 
         private Bootstrap serverBootstrap;
 
         public NettyUDPServer(NettyConfig nettyConfig,
-                IChannelHandler channelInitializer) : base(nettyConfig, channelInitializer)
+                IChannelHandler channelInitializer,ILogger<NettyUDPServer> logger) : base(nettyConfig, channelInitializer,logger)
         {
 
         }

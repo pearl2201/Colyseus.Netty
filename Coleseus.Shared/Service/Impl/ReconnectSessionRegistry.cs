@@ -50,7 +50,7 @@ namespace Coleseus.Shared.Service.Impl
 
     }
 
-    public class ClearSessionTask : Gjob
+    public class ClearSessionTask : ScheduleTask
     {
 
         string reconnectKey;
