@@ -12,12 +12,13 @@ namespace Coleseus.Shared.Communication
     {
         private readonly IChannel _channel;
         private DeliveryGuaranty DELIVERY_GUARANTY = DeliveryGuaranty.RELIABLE;
-        private readonly ILogger<NettyTCPMessageSender> _logger;
+        private readonly Serilog.ILogger _logger = Serilog.Log.ForContext<NettyTCPMessageSender>();
 
         public NettyTCPMessageSender(IChannel channel)
         {
 
             _channel = channel;
+            
         }
 
 
@@ -45,7 +46,7 @@ namespace Coleseus.Shared.Communication
 
         public void close()
         {
-            _logger.LogDebug("Going to close tcp connection");
+            _logger.Debug("Going to close tcp connection");
             IEvent @event = Events.CreateEvent(null, Events.DISCONNECT);
             if (_channel.Active)
             {
@@ -54,7 +55,7 @@ namespace Coleseus.Shared.Communication
             else
             {
                 _channel.CloseAsync().Wait();
-                _logger.LogDebug("Unable to write the Event {} with type {} to socket",
+                _logger.Debug("Unable to write the Event {} with type {} to socket",
                         @event, @event.GetType());
 
             }

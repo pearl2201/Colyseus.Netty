@@ -15,7 +15,7 @@ namespace Coleseus.Shared.App
  * @author Abraham Menacherry
  * 
  */
-    public interface Gjob
+    public interface ScheduleTask
     {
         /**
 		 * @return returns the unique task id of the task. For future

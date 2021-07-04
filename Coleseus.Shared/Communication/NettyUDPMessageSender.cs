@@ -24,7 +24,8 @@ namespace Coleseus.Shared.Communication
     public class NettyUDPMessageSender : Fast
     {
 
-        private readonly ILogger<NettyUDPMessageSender> _logger;
+        
+        private readonly Serilog.ILogger _logger = Serilog.Log.ForContext<NettyUDPMessageSender>();
         private EndPoint remoteAddress;
         private IDatagramChannel channel;
         private ISessionRegistryService<EndPoint> sessionRegistryService;
@@ -65,11 +66,11 @@ namespace Coleseus.Shared.Communication
             ISession session = sessionRegistryService.getSession(remoteAddress);
             if (sessionRegistryService.removeSession(remoteAddress))
             {
-                _logger.LogDebug("Successfully removed session: {}", session);
+                _logger.Debug("Successfully removed session: {}", session);
             }
             else
             {
-                _logger.LogTrace("No udp session found for address: {}", remoteAddress);
+                _logger.Verbose("No udp session found for address: {}", remoteAddress);
             }
 
         }

@@ -31,20 +31,20 @@ namespace Coleseus.Shared.Service.Impl
         }
 
 
-        public void execute(Gjob task)
+        public void Execute(ScheduleTask task)
         {
             base.execute(task);
         }
 
 
-        public Task schedule(Gjob task, long delay, TimeUnit unit)
+        public Task Schedule(ScheduleTask task, long delay, TimeUnit unit)
         {
             task.setId(taskNum.incrementAndGet());
             return base.schedule(task, delay, unit);
         }
 
 
-        public Task scheduleAtFixedRate(Gjob task, long initialDelay,
+        public Task ScheduleAtFixedRate(ScheduleTask task, long initialDelay,
                 long period, TimeUnit unit)
         {
             task.setId(taskNum.incrementAndGet());
@@ -52,7 +52,7 @@ namespace Coleseus.Shared.Service.Impl
         }
 
 
-        public Task scheduleWithFixedDelay(Gjob task,
+        public Task ScheduleWithFixedDelay(ScheduleTask task,
                 long initialDelay, long delay, TimeUnit unit)
         {
             task.setId(taskNum.incrementAndGet());

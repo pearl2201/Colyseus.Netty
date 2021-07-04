@@ -1,5 +1,8 @@
+using Coleseus.Shared.Server;
+using Coleseus.Shared.Server.Netty;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Quartz;
 using Samples.Akka.AspNetCore.Actors;
 using Samples.Akka.AspNetCore.Services;
 using Serilog;
@@ -32,6 +35,10 @@ namespace Colyseus.NettyServer
                 .ConfigureServices((hostContext, services) =>
                 {
                     services.AddHostedService<Worker>();
+                    services.AddHostedService<GammeServerWorker>();
+                    services.AddSingleton<NettyTCPServer>();
+                    services.AddSingleton<NettyUDPServer>();
+                    services.AddSingleton<ServerManager,ServerManagerImpl>();
                     // set up a simple service we're going to hash
                     services.AddScoped<IHashService, HashServiceImpl>();
 
@@ -40,6 +47,18 @@ namespace Colyseus.NettyServer
 
                     // starts the IHostedService, which creates the ActorSystem and actors
                     services.AddHostedService<AkkaService>(sp => (AkkaService)sp.GetRequiredService<IPublicHashingService>());
+
+                    services.AddQuartz(q =>
+                    {
+                        // your configuration here
+                    });
+
+                    // Quartz.Extensions.Hosting hosting
+                    services.AddQuartzHostedService(options =>
+                    {
+                        // when shutting down we want jobs to complete gracefully
+                        options.WaitForJobsToComplete = true;
+                    });
                 });
     }
 }

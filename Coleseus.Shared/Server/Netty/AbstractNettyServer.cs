@@ -13,17 +13,18 @@ namespace Coleseus.Shared.Server.Netty
 {
     public abstract class AbstractNettyServer : NettyServer
     {
-        private readonly ILogger<AbstractNettyServer> _logger;
+        protected readonly ILogger<AbstractNettyServer> _logger;
         public static IChannelGroup ALL_CHANNELS = new DefaultChannelGroup(new SingleThreadEventExecutor("TcpNettyServer", TimeSpan.FromSeconds(10)));
         protected IGameAdminService gameAdminService;
         protected NettyConfig nettyConfig;
         protected IChannelHandler channelInitializer;
 
         public AbstractNettyServer(NettyConfig nettyConfig,
-               IChannelHandler channelInitializer)
+               IChannelHandler channelInitializer, ILogger<AbstractNettyServer> logger)
         {
             this.nettyConfig = nettyConfig;
             this.channelInitializer = channelInitializer;
+            _logger = logger;
         }
 
 

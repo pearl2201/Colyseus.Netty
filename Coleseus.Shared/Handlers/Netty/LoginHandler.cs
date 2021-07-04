@@ -22,7 +22,7 @@ namespace Coleseus.Shared.Handlers.Netty
     public class LoginHandler : SimpleChannelInboundHandler<IEvent>
     {
 
-        private readonly ILogger<LoginHandler> _logger;
+        private readonly Serilog.ILogger _logger = Serilog.Log.ForContext<LoginHandler>();
 
         protected ILookupService lookupService;
         protected ISessionRegistryService<SocketAddress> udpSessionRegistry;
@@ -45,14 +45,14 @@ namespace Coleseus.Shared.Handlers.Netty
             if (Events.LOG_IN == type)
 
             {
-                _logger.LogDebug("Login attempt from {}", channel.RemoteAddress);
+                _logger.Debug("Login attempt from {}", channel.RemoteAddress);
                 IPlayer player = lookupPlayer(buffer, channel);
                 handleLogin(player, ctx, buffer);
             }
             else if (Events.RECONNECT == type)
 
             {
-                _logger.LogDebug("Reconnect attempt from {}", channel.RemoteAddress);
+                _logger.Debug("Reconnect attempt from {}", channel.RemoteAddress);
                 String reconnectKey = NettyUtils.readString(buffer);
                 IPlayerSession playerSession = lookupSession(reconnectKey);
                 handleReconnect(playerSession, ctx, buffer);
@@ -61,7 +61,7 @@ namespace Coleseus.Shared.Handlers.Netty
             else
 
             {
-                _logger.LogError("Invalid @event {} sent from remote address {}. "
+                _logger.Error("Invalid @event {} sent from remote address {}. "
                         + "Going to close channel {}",
                         new Object[] { @event.getType(), channel.RemoteAddress,
                             channel});
@@ -74,7 +74,7 @@ namespace Coleseus.Shared.Handlers.Netty
 
         {
             IChannel channel = context.Channel;
-            _logger.LogError(
+            _logger.Error(
                         "Exception {} occurred during log in process, going to close channel {}",
                         exception, channel);
             channel.CloseAsync().Wait();
@@ -86,7 +86,7 @@ namespace Coleseus.Shared.Handlers.Netty
         {
             base.ChannelActive(ctx);
             AbstractNettyServer.ALL_CHANNELS.Add(ctx.Channel);
-            _logger.LogDebug("Added Channel {} as the {}th open channel", ctx
+            _logger.Debug("Added Channel {} as the {}th open channel", ctx
                     .Channel, Interlocked.Increment(ref CHANNEL_COUNTER));
         }
 
@@ -98,7 +98,7 @@ namespace Coleseus.Shared.Handlers.Netty
             IPlayer player = lookupService.playerLookup(credentials);
             if (null == player)
             {
-                _logger.LogError("Invalid credentials provided by user: {}", credentials);
+                _logger.Error("Invalid credentials provided by user: {}", credentials);
             }
             return player;
         }
@@ -190,7 +190,7 @@ namespace Coleseus.Shared.Handlers.Netty
                         .generateFor(playerSession.GetType());
                 playerSession.setAttribute(ColyseusConfig.RECONNECT_KEY, reconnectKey);
                 playerSession.setAttribute(ColyseusConfig.RECONNECT_REGISTRY, reconnectRegistry);
-                _logger.LogDebug("Sending GAME_ROOM_JOIN_SUCCESS to channel {}", channel);
+                _logger.Debug("Sending GAME_ROOM_JOIN_SUCCESS to channel {}", channel);
                 IByteBuffer reconnectKeyBuffer = Unpooled.WrappedBuffer(NettyUtils.createBufferForOpcode(Events.GAME_ROOM_JOIN_SUCCESS),
                                 NettyUtils.WriteString(reconnectKey));
                 Task future = channel.WriteAndFlushAsync(reconnectKeyBuffer);
@@ -202,14 +202,14 @@ namespace Coleseus.Shared.Handlers.Netty
                 // Write failure and close channel.
                 channel.WriteAndFlushAsync(NettyUtils.createBufferForOpcode(Events.GAME_ROOM_JOIN_FAILURE));
 
-                _logger.LogError("Invalid ref key provided by client: {}. Channel {} will be closed", refKey, channel);
+                _logger.Error("Invalid ref key provided by client: {}. Channel {} will be closed", refKey, channel);
             }
         }
 
         protected void handleReJoin(IPlayerSession playerSession, GameRoom gameRoom, IChannel channel,
                 IByteBuffer buffer)
         {
-            _logger.LogTrace("Going to clear pipeline");
+            _logger.Verbose("Going to clear pipeline");
             // Clear the existing pipeline
             NettyUtils.clearPipeline(channel.Pipeline);
             // Set the tcp channel on the session. 
@@ -228,10 +228,10 @@ namespace Coleseus.Shared.Handlers.Netty
             future.ContinueWith((x) =>
             {
                 //Channel channel = future.channel();
-                _logger.LogTrace("Sending GAME_ROOM_JOIN_SUCCESS to channel {} completed", channel);
+                _logger.Verbose("Sending GAME_ROOM_JOIN_SUCCESS to channel {} completed", channel);
                 if (future.Status == TaskStatus.RanToCompletion)
                 {
-                    _logger.LogTrace("Going to clear pipeline");
+                    _logger.Verbose("Going to clear pipeline");
                     // Clear the existing pipeline
                     NettyUtils.clearPipeline(channel.Pipeline);
                     // Set the tcp channel on the session. 
@@ -245,7 +245,7 @@ namespace Coleseus.Shared.Handlers.Netty
                 }
                 else
                 {
-                    _logger.LogError("GAME_ROOM_JOIN_SUCCESS message sending to client was failure, channel will be closed");
+                    _logger.Error("GAME_ROOM_JOIN_SUCCESS message sending to client was failure, channel will be closed");
                     channel.CloseAsync().Wait();
                 }
             });

@@ -22,7 +22,7 @@ namespace Coleseus.Shared.Service.Impl
 
         public override bool putSession(String key, ISession session)
         {
-            taskManagerService.schedule(new ClearSessionTask(key, sessions),
+            taskManagerService.Schedule(new ClearSessionTask(key, sessions),
                     reconnectDelay, TimeUnit.MILLISECONDS);
             return base.putSession(key, session);
         }
@@ -50,7 +50,7 @@ namespace Coleseus.Shared.Service.Impl
 
     }
 
-    public class ClearSessionTask : Gjob
+    public class ClearSessionTask : ScheduleTask
     {
 
         string reconnectKey;

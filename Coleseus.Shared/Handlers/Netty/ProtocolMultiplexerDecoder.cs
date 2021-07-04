@@ -26,7 +26,7 @@ namespace Coleseus.Shared.Handlers.Netty
     {
 
 
-        private readonly ILogger<ProtocolMultiplexerDecoder> _logger;
+        private readonly Serilog.ILogger _logger = Serilog.Log.ForContext<ProtocolMultiplexerDecoder>();
 
         private LoginProtocol loginProtocol;
         private int bytesForProtocolCheck;
@@ -57,7 +57,7 @@ namespace Coleseus.Shared.Handlers.Netty
                 byte[] headerBytes = new byte[bytesForProtocolCheck];
                 @in.GetBytes(@in.ReaderIndex, headerBytes, 0,
                         bytesForProtocolCheck);
-                _logger.LogError(
+                _logger.Error(
                             "Unknown protocol, discard everything and close the connection {}. Incoming Bytes {}",
                             ctx.Channel,
                             BinaryUtils.getHexString(headerBytes));
