@@ -131,8 +131,7 @@ namespace Coleseus.Shared.App.Impl
         {
             if (null == eventDispatcher)
             {
-                eventDispatcher = EventDispatchers.newJetlangEventDispatcher(
-                        parentGameRoom, LaneStrategies.GROUP_BY_ROOM);
+                eventDispatcher = new ExecutorEventDispatcher();
             }
             base.validateAndSetValues();
         }

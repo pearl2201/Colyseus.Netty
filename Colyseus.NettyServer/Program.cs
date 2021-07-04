@@ -1,5 +1,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Samples.Akka.AspNetCore.Actors;
+using Samples.Akka.AspNetCore.Services;
 using Serilog;
 using Serilog.Events;
 using System;
@@ -18,7 +20,7 @@ namespace Colyseus.NettyServer
                 .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
                 .Enrich.FromLogContext()
                 .WriteTo.Console()
-            
+
                 .CreateLogger();
 
             CreateHostBuilder(args).Build().Run();
@@ -30,6 +32,14 @@ namespace Colyseus.NettyServer
                 .ConfigureServices((hostContext, services) =>
                 {
                     services.AddHostedService<Worker>();
+                    // set up a simple service we're going to hash
+                    services.AddScoped<IHashService, HashServiceImpl>();
+
+                    // creates instance of IPublicHashingService that can be accessed by ASP.NET
+                    services.AddSingleton<IPublicHashingService, AkkaService>();
+
+                    // starts the IHostedService, which creates the ActorSystem and actors
+                    services.AddHostedService<AkkaService>(sp => (AkkaService)sp.GetRequiredService<IPublicHashingService>());
                 });
     }
 }

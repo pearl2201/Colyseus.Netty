@@ -20,12 +20,11 @@ namespace Coleseus.Shared.App.Impl
         public IGame parentGame;
         public String gameRoomName;
         public IProtocol protocol;
-        public LaneStrategy<String, ExecutorService, GameRoom> laneStrategy;
         public IGameStateManagerService stateManager;
         public SessionFactory sessionFactory;
 
 
-        protected void validateAndSetValues()
+        public override void validateAndSetValues()
         {
             id = Guid.NewGuid().ToString();
             if (null == sessionAttributes)
@@ -36,10 +35,7 @@ namespace Coleseus.Shared.App.Impl
             {
                 sessions = new HashSet<IPlayerSession>();
             }
-            if (null == laneStrategy)
-            {
-                laneStrategy = LaneStrategies.GROUP_BY_ROOM;
-            }
+           
             if (null == stateManager)
             {
                 stateManager = new GameStateManager();
@@ -75,12 +71,7 @@ namespace Coleseus.Shared.App.Impl
             return this;
         }
 
-        public GameRoomSessionBuilder SetLaneStrategy(
-                LaneStrategy<String, ExecutorService, GameRoom> laneStrategy)
-        {
-            this.laneStrategy = laneStrategy;
-            return this;
-        }
+     
 
         public GameRoomSessionBuilder SetStateManager(
                 IGameStateManagerService gameStateManagerService)
@@ -129,6 +120,8 @@ namespace Coleseus.Shared.App.Impl
 
         protected SessionFactory sessionFactory;
 
+        protected IEventDispatcher eventDispatcher;
+
         private Mutex mute = new Mutex();
 
         protected GameRoomSession(GameRoomSessionBuilder gameRoomSessionBuilder) : base(gameRoomSessionBuilder)
@@ -143,8 +136,7 @@ namespace Coleseus.Shared.App.Impl
 
             if (null == gameRoomSessionBuilder.eventDispatcher)
             {
-                this.eventDispatcher = EventDispatchers.newJetlangEventDispatcher(
-                        this, gameRoomSessionBuilder.laneStrategy);
+                this.eventDispatcher = new ExecutorEventDispatcher();
             }
         }
 
@@ -159,7 +151,7 @@ namespace Coleseus.Shared.App.Impl
                 Object state = manager.getState();
                 if (null != state)
                 {
-                    playerSession.onEvent(Events.networkEvent(state));
+                    playerSession.onEvent(Events.NetworkEvent(state));
                 }
             }
         }

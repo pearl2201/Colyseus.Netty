@@ -146,7 +146,7 @@ namespace Coleseus.Shared.Event
         public static IEvent connectEvent(Reliable tcpSender)
         {
             IEvent @event = new DefaultConnectEvent(tcpSender);
-            @event.setTimeStamp(System.DateTime.UtcNow-);
+            @event.setTimeStamp(System.DateTime.UtcNow);
             return @event;
         }
 

@@ -280,7 +280,7 @@ namespace Coleseus.Shared.App.Impl
             }
             if (null == eventDispatcher)
             {
-                eventDispatcher = EventDispatchers.newJetlangEventDispatcher(null, null);
+                eventDispatcher = new ExecutorEventDispatcher();
             }
             if (null == sessionAttributes)
             {

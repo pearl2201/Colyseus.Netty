@@ -1,4 +1,3 @@
-using UnityEngine;
 using System.IO;
 using System.Text;
 using GameDevWare.Serialization;

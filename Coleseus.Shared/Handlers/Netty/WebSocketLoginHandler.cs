@@ -54,7 +54,7 @@ namespace Coleseus.Shared.Handlers.Netty
                 List<String> credList = null;
                 credList = (List<string>)@event.getSource();
                 IPlayer player = lookupPlayer(credList[0], credList[1]);
-                handleLogin(player, channel);
+                handleLogin(player, channel).Wait();
                 handleGameRoomJoin(player, channel, credList[2]);
             }
             else if (type == Events.RECONNECT)
@@ -75,7 +75,7 @@ namespace Coleseus.Shared.Handlers.Netty
                         new Object[] { @event.GetType(),
                             channel.RemoteAddress, channel
     });
-                closeChannelWithLoginFailure(channel);
+                closeChannelWithLoginFailure(channel).Wait();
             }
         }
 
@@ -113,13 +113,13 @@ namespace Coleseus.Shared.Handlers.Netty
                 if (null != playerSession.getTcpSender())
                     playerSession.getTcpSender().close();
 
-                handleReJoin(playerSession, gameRoom, channel);
+                handleReJoin(playerSession, gameRoom, channel).Wait();
             }
             else
 
             {
                 // Write future and close channel
-                closeChannelWithLoginFailure(channel);
+                closeChannelWithLoginFailure(channel).Wait();
             }
         }
 
@@ -130,7 +130,7 @@ namespace Coleseus.Shared.Handlers.Netty
             playerSession.setTcpSender(sender);
             // Connect the pipeline to the game room.
             gameRoom.connectSession(playerSession);
-            await channel.WriteAndFlushAsync(Events.GAME_ROOM_JOIN_SUCCESS, null);//assumes that the protocol applied will take care of event objects.
+            await channel.WriteAndFlushAsync(Events.GAME_ROOM_JOIN_SUCCESS);//assumes that the protocol applied will take care of event objects.
             playerSession.isWriteable = true;// TODO remove if unnecessary. It should be done in start event
                                              // Send the re-connect event so that it will in turn send the START event.
             playerSession.onEvent(new ReconnetEvent(sender));
@@ -147,7 +147,7 @@ namespace Coleseus.Shared.Handlers.Netty
             return player;
         }
 
-        public async Gjob handleLogin(IPlayer player, IChannel channel)
+        public async Task handleLogin(IPlayer player, IChannel channel)
         {
             if (null != player)
 
@@ -158,7 +158,7 @@ namespace Coleseus.Shared.Handlers.Netty
 
             {
                 // Write future and close channel
-                closeChannelWithLoginFailure(channel);
+                closeChannelWithLoginFailure(channel).Wait();
             }
         }
 
@@ -176,22 +176,21 @@ namespace Coleseus.Shared.Handlers.Netty
             {
                 IPlayerSession playerSession = gameRoom.createPlayerSession(player);
                 String reconnectKey = (String)idGeneratorService
-                        .generateFor(playerSession.getClass());
+                        .generateFor(playerSession.GetType());
                 playerSession.setAttribute(ColyseusConfig.RECONNECT_KEY, reconnectKey);
                 playerSession.setAttribute(ColyseusConfig.RECONNECT_REGISTRY, reconnectRegistry);
                 _logger.LogTrace("Sending GAME_ROOM_JOIN_SUCCESS to channel {}",
                         channel);
                 var task = channel.WriteAndFlushAsync(eventToFrame(
                         Events.GAME_ROOM_JOIN_SUCCESS, reconnectKey));
-                connectToGameRoom(gameRoom, playerSession, task);
+                connectToGameRoom(gameRoom, playerSession, task,channel);
             }
             else
 
             {
                 // Write failure and close channel.
-                ChannelFuture future = channel.writeAndFlush(eventToFrame(
-                        Events.GAME_ROOM_JOIN_FAILURE, null));
-                future.addListener(ChannelFutureListener.CLOSE);
+                channel.WriteAndFlushAsync(eventToFrame(
+                        Events.GAME_ROOM_JOIN_FAILURE, null)).Wait();
                 _logger.LogError(
                         "Invalid ref key provided by client: {}. Channel {} will be closed",
                         refKey, channel);
@@ -199,11 +198,11 @@ namespace Coleseus.Shared.Handlers.Netty
         }
 
         public void connectToGameRoom(GameRoom gameRoom,
-                 IPlayerSession playerSession, Task future)
+                 IPlayerSession playerSession, Task future,IChannel channel)
         {
             future.ContinueWith((x) =>
             {
-                Channel channel = future.channel();
+               
                 _logger.LogTrace(
                         "Sending GAME_ROOM_JOIN_SUCCESS to channel {} completed",
                         channel);
@@ -222,7 +221,7 @@ namespace Coleseus.Shared.Handlers.Netty
                 else
                 {
                     _logger.LogError("Sending GAME_ROOM_JOIN_SUCCESS message to client was failure, channel will be closed");
-                    channel.close();
+                    channel.CloseAsync().Wait();
                 }
             });
 
@@ -265,12 +264,12 @@ namespace Coleseus.Shared.Handlers.Netty
             this.idGeneratorService = idGeneratorService;
         }
 
-        public ObjectMapper getJackson()
+        public IMapper getJackson()
         {
             return jackson;
         }
 
-        public void setJackson(ObjectMapper jackson)
+        public void setJackson(IMapper jackson)
         {
             this.jackson = jackson;
         }
