@@ -1,6 +1,8 @@
 using System.IO;
+using System.Linq;
 using System.Text;
 using GameDevWare.Serialization;
+using Serilog;
 
 namespace Colyseus
 {
@@ -13,7 +15,7 @@ namespace Colyseus
 		{
 			//Debug.Log("FULL STATE");
 			//PrintByteArray(rawEncodedState);
-			previousState = ArrayUtils.SubArray(rawEncodedState, offset, rawEncodedState.Length - 1);
+			previousState = rawEncodedState.Skip(offset).ToArray();
 			State.Set(MsgPack.Deserialize<IndexedDictionary<string, object>>(new MemoryStream(previousState)));
 		}
 
@@ -26,7 +28,7 @@ namespace Colyseus
 		{
 			//Debug.Log("PATCH STATE");
 			//PrintByteArray(bytes);
-			previousState = Fossil.Delta.Apply(previousState, ArrayUtils.SubArray(bytes, offset, bytes.Length - 1));
+			previousState = Fossil.Delta.Apply(previousState, bytes.Skip(offset).ToArray());
 			var newState = MsgPack.Deserialize<IndexedDictionary<string, object>>(new MemoryStream(previousState));
 			State.Set(newState);
 		}
@@ -38,7 +40,7 @@ namespace Colyseus
 
 		public void Handshake(byte[] bytes, int offset)
 		{
-			Debug.Log("Handshake FossilDeltaSerializer!");
+			Log.Information("Handshake FossilDeltaSerializer!");
 		}
 
 		//public void PrintByteArray(byte[] bytes)

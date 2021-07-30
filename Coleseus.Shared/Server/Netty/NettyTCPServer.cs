@@ -23,10 +23,10 @@ namespace Coleseus.Shared.Server.Netty
 
         private ServerBootstrap serverBootstrap;
 
-        public NettyTCPServer(NettyConfig nettyConfig,
-                IChannelHandler channelInitializer,ILogger<NettyTCPServer> logger) : base(nettyConfig, channelInitializer,logger)
+        public NettyTCPServer(NettyConfig nettyConfig, 
+                ProtocolMultiplexerChannelInitializer channelInitializer,ILogger<NettyTCPServer> logger) : base(nettyConfig, channelInitializer, logger)
         {
-
+         
         }
 
 

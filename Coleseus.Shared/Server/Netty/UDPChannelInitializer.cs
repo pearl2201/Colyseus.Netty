@@ -20,14 +20,11 @@ namespace Coleseus.Shared.Server.Netty
         // Create a default pipeline implementation.
         private UDPUpstreamHandler upstream;
 
-        public UDPChannelInitializer()
-        {
-
-        }
 
         public UDPChannelInitializer(UDPUpstreamHandler upstream)
         {
             this.upstream = upstream;
+            udpEventEncoder = new UDPEventEncoder();
         }
 
 

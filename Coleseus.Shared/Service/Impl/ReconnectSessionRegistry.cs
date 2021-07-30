@@ -1,4 +1,5 @@
 ﻿using Coleseus.Shared.App;
+using Coleseus.Shared.App.Impl;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -16,27 +17,31 @@ namespace Coleseus.Shared.Service.Impl
 	 */
     public class ReconnectSessionRegistry : SessionRegistry<String>
     {
-        TaskManagerService taskManagerService;
+        TaskManagerService _taskManagerService;
         int reconnectDelay = ColyseusConfig.DEFAULT_RECONNECT_DELAY;
 
+        public ReconnectSessionRegistry(TaskManagerService taskManagerService) : base()
+        {
+            _taskManagerService = taskManagerService;
+        }
 
         public override bool putSession(String key, ISession session)
         {
-            taskManagerService.Schedule(new ClearSessionTask(key, sessions),
-                    reconnectDelay, TimeUnit.MILLISECONDS);
+            _taskManagerService.AddTask(new ClearSessionTask(key, sessions)
+            {
+                TaskTimeSpan = TimeSpan.FromMilliseconds(1),
+                TaskRunAtStart = true
+            });
             return base.putSession(key, session);
         }
 
 
         public TaskManagerService getTaskManagerService()
         {
-            return taskManagerService;
+            return _taskManagerService;
         }
 
-        public void setTaskManagerService(TaskManagerService taskManagerService)
-        {
-            this.taskManagerService = taskManagerService;
-        }
+
 
         public int getReconnectDelay()
         {
@@ -50,7 +55,7 @@ namespace Coleseus.Shared.Service.Impl
 
     }
 
-    public class ClearSessionTask : ScheduleTask
+    public class ClearSessionTask : AbstractScheduleTask
     {
 
         string reconnectKey;
@@ -63,14 +68,12 @@ namespace Coleseus.Shared.Service.Impl
             this.sessions = sessions;
         }
 
-
-        public void run()
+        public override void Execute()
         {
             ISession session = sessions[reconnectKey];
             if (null != session)
             {
                 lock (session)
-
                 {
                     // at this point it could have been removed by re-connect
                     // handler already, hence another null check required.
@@ -82,17 +85,5 @@ namespace Coleseus.Shared.Service.Impl
                 }
             }
         }
-
-
-        public Object getId()
-        {
-            return null;
-        }
-
-
-        public void setId(Object id)
-        {
-        }
-
     }
 }

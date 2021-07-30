@@ -6,41 +6,41 @@ using System.Text;
 
 namespace Coleseus.Shared.Service.Impl
 {
-	public class SessionRegistry<T> : ISessionRegistryService<T>
-{
-	protected ConcurrentDictionary<T, ISession> sessions;
+    public class SessionRegistry<T> : ISessionRegistryService<T>
+    {
+        protected ConcurrentDictionary<T, ISession> sessions;
 
-	public SessionRegistry()
-	{
-		sessions = new ConcurrentDictionary<T, ISession>();
-	}
+        public SessionRegistry()
+        {
+            sessions = new ConcurrentDictionary<T, ISession>();
+        }
 
-	
-	public ISession getSession(T key)
-	{
-		return sessions[key];
-	}
 
-	
-	public virtual bool putSession(T key, ISession session)
-	{
-		if (null == key || null == session)
-		{
-			return false;
-		}
+        public ISession getSession(T key)
+        {
+            return sessions[key];
+        }
 
-		if (sessions.TryAdd(key, session))
-		{
-			return true;
-		}
-		return false;
-	}
 
-	
-	public bool removeSession(T key)
-	{
-		return sessions.TryRemove(key, out ISession session);
-	}
+        public virtual bool putSession(T key, ISession session)
+        {
+            if (null == key || null == session)
+            {
+                return false;
+            }
 
-}
+            if (sessions.TryAdd(key, session))
+            {
+                return true;
+            }
+            return false;
+        }
+
+
+        public bool removeSession(T key)
+        {
+            return sessions.TryRemove(key, out ISession session);
+        }
+
+    }
 }

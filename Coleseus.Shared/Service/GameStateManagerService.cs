@@ -15,18 +15,13 @@ namespace Coleseus.Shared.Service
     public interface IGameStateManagerService
     {
         /**
-		 * @return Returns the current state object. This could be any object like a
+		 *  This could be any object like a
 		 *         byte array, an object reference that holds a hierarchy of other
 		 *         objects etc. This will be used to manage the state of the game.
 		 */
-        Object getState();
+        Object State { get; set; }
 
-        /**
-		 * Set's current state object. This could be any object like a byte array,
-		 * an object reference that holds a hierarchy of other objects etc. This
-		 * will be used to manage the state of the game.
-		 */
-        void setState(Object state);
+       
 
         /**
 		 * Method used to achieve synchronization while doing state management.
@@ -37,7 +32,7 @@ namespace Coleseus.Shared.Service
 		 * @return True if the atomic compare and set was successful. False
 		 *         otherwise.
 		 */
-        bool compareAndSetSyncKey(Object key);
+        bool CompareAndSetSyncKey(Object key);
 
         /**
 		 * This method is actually a combination of compareAndSetSyncKey and
@@ -51,7 +46,7 @@ namespace Coleseus.Shared.Service
 		 *            The new state to be set.
 		 * @return True if sync key is valid, false if it is invalid.
 		 */
-        bool compareAndSetState(Object syncKey, Object state);
+        bool CompareAndSetState(Object syncKey, Object state);
 
         /**
 		 * Method used to retrieve the synchronization key object. For the case of
@@ -60,7 +55,7 @@ namespace Coleseus.Shared.Service
 		 * @return Returns the synchronization key associated with the state
 		 *         manager.
 		 */
-        Object getSyncKey();
+        Object GetSyncKey();
 
         /**
 		 * Whenever serialization is done from Java object to AMF3, or just plain
@@ -70,7 +65,7 @@ namespace Coleseus.Shared.Service
 		 * 
 		 * @return Return the latest byte array representation of the state.
 		 */
-        byte[] getSerializedByteArray();
+        byte[] GetSerializedByteArray();
 
         /**
 		 * Whenever serialization is done from Java object to AMF3, or just plain
@@ -82,15 +77,15 @@ namespace Coleseus.Shared.Service
 		 *            the serialized AMF3 or other object in byte array format.
 		 * 
 		 */
-        void setSerializedByteArray(byte[] serializedBytes);
+        void SetSerializedByteArray(byte[] serializedBytes);
         //throws UnsupportedOperationException;
 
-        Object computeNextState(Object state, Object syncKey,
+        Object ComputeNextState(Object state, Object syncKey,
                Object stateAlgorithm); //throws UnsupportedOperationException;
 
-        Object computeAndSetNextState(Object state, Object syncKey,
+        Object ComputeAndSetNextState(Object state, Object syncKey,
                Object stateAlgorithm); //throws UnsupportedOperationException;
 
-        Object getStateAlgorithm();//throws UnsupportedOperationException;
+        Object GetStateAlgorithm();//throws UnsupportedOperationException;
     }
 }

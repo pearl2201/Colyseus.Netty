@@ -24,7 +24,7 @@ namespace Coleseus.Shared.Server.Netty
         private Bootstrap serverBootstrap;
 
         public NettyUDPServer(NettyConfig nettyConfig,
-                IChannelHandler channelInitializer,ILogger<NettyUDPServer> logger) : base(nettyConfig, channelInitializer,logger)
+                UDPChannelInitializer channelInitializer,ILogger<NettyUDPServer> logger) : base(nettyConfig, channelInitializer,logger)
         {
 
         }

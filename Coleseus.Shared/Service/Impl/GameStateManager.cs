@@ -6,14 +6,14 @@ using Serilog;
 
 namespace Coleseus.Shared.Service.Impl
 {
-    class GameStateManager : IGameStateManagerService
+    public class GameStateManager : IGameStateManagerService
     {
         private readonly ILogger _logger = Serilog.Log.Logger.ForContext<GameStateManager>();
 
         private Object state;
         byte[] serializedBytes;
         private int syncKey;
-
+        private readonly object _syncObj = new object();
         public GameStateManager()
         {
             state = null;
@@ -28,22 +28,13 @@ namespace Coleseus.Shared.Service.Impl
         }
 
 
-        public Object getState()
+        public Object State { get { return state; } set { state = value; } }
+
+
+        public bool CompareAndSetState(Object key, Object state)
         {
-            return state;
-        }
-
-
-        public void setState(Object state)
-        {
-            this.state = state;
-        }
-
-
-        public bool compareAndSetState(Object key, Object state)
-        {
-            bool syncKeySet = compareAndSetSyncKey(key);
-            if (compareAndSetSyncKey(key))
+            bool syncKeySet = CompareAndSetSyncKey(key);
+            if (syncKeySet)
             {
                 this.state = state;
             }
@@ -51,38 +42,50 @@ namespace Coleseus.Shared.Service.Impl
         }
 
 
-        public Object getSyncKey()
+        public Object GetSyncKey()
         {
             return syncKey;
         }
 
 
-        public bool compareAndSetSyncKey(Object key)
+        public bool CompareAndSetSyncKey(Object key)
         {
-            if (null == key || !(key is int))
+            lock (_syncObj)
             {
-                _logger.Error("Invalid key provided: {}", key);
-                return false;
-            }
+                if (null == key || !(key is int))
+                {
+                    _logger.Error("Invalid key provided: {}", key);
+                    return false;
+                }
 
-            int newKey = (int)key;
-            return Interlocked.Increment(ref syncKey); 
+
+                int newKey = (int)key;
+                if (newKey == syncKey)
+                {
+                    Interlocked.Increment(ref syncKey);
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
         }
 
 
-        public byte[] getSerializedByteArray()
+        public byte[] GetSerializedByteArray()
         {
             return serializedBytes;
         }
 
 
-        public void setSerializedByteArray(byte[] serializedBytes)
+        public void SetSerializedByteArray(byte[] serializedBytes)
         {
             this.serializedBytes = serializedBytes;
         }
 
 
-        public Object computeAndSetNextState(Object state, Object syncKey,
+        public Object ComputeAndSetNextState(Object state, Object syncKey,
                 Object stateAlgorithm)
         {
             throw new MissingMethodException("computeAndSetNextState"
@@ -90,7 +93,7 @@ namespace Coleseus.Shared.Service.Impl
                     + "Object stateAlgorithm) not supported yet");
         }
 
-        public Object computeNextState(Object state, Object syncKey,
+        public Object ComputeNextState(Object state, Object syncKey,
                     Object stateAlgorithm)
         {
             throw new MissingMethodException("computeNextState"
@@ -99,7 +102,7 @@ namespace Coleseus.Shared.Service.Impl
         }
 
 
-        public Object getStateAlgorithm()
+        public Object GetStateAlgorithm()
         {
             throw new MissingMethodException("getStateAlgorithm()"
                     + " not supported yet");

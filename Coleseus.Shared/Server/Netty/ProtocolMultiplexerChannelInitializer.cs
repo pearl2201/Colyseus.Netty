@@ -8,7 +8,7 @@ using System.Text;
 
 namespace Coleseus.Shared.Server.Netty
 {
-    public class ProtocolMultiplexerPipelineFactory : ChannelInitializer<ISocketChannel>
+    public class ProtocolMultiplexerChannelInitializer : ChannelInitializer<ISocketChannel>
     {
         // TODO make this configurable from spring.
         private const int MAX_IDLE_SECONDS = 60;

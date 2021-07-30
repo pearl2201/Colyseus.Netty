@@ -21,9 +21,10 @@ namespace Coleseus.Shared.Handlers.Netty
         private ISessionRegistryService<EndPoint> udpSessionRegistry;
         private MessageBufferEventDecoder messageBufferEventDecoder;
 
-        public UDPUpstreamHandler() : base()
+        public UDPUpstreamHandler(ISessionRegistryService<EndPoint> udpSessionRegistry, MessageBufferEventDecoder messageBufferEventDecoder) : base()
         {
-
+            this.udpSessionRegistry = udpSessionRegistry;
+            this.messageBufferEventDecoder = messageBufferEventDecoder;
         }
 
 

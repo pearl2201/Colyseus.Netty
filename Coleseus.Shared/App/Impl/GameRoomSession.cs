@@ -149,7 +149,7 @@ namespace Coleseus.Shared.App.Impl
             IGameStateManagerService manager = getStateManager();
             if (null != manager)
             {
-                Object state = manager.getState();
+                Object state = manager.State;
                 if (null != state)
                 {
                     playerSession.onEvent(Events.NetworkEvent(state));

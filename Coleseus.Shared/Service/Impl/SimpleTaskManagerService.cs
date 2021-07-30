@@ -17,46 +17,38 @@ namespace Coleseus.Shared.Service.Impl
 	 * @author Abraham Menacherry
 	 * 
 	 */
-    public class SimpleTaskManagerService : ScheduledThreadPoolExecutor, TaskManagerService
+    public class SimpleTaskManagerService :  TaskManagerService
     {
-        /**
-         * Used to create a unique identifier for each task
-         */
-        private AtomicInteger taskNum;
+        private readonly List<ScheduleTask> _tasks;
 
-        public SimpleTaskManagerService(int corePoolSize)
+        public SimpleTaskManagerService()
         {
-            base(corePoolSize);
-            taskNum = new AtomicInteger(0);
+            _tasks = new List<ScheduleTask>();
         }
 
-
-        public void Execute(ScheduleTask task)
+        public void AddTask(ScheduleTask task)
         {
-            base.execute(task);
+            _tasks.Add(task);
         }
 
-
-        public Task Schedule(ScheduleTask task, long delay, TimeUnit unit)
+        public void RemoveTask(ScheduleTask task)
         {
-            task.setId(taskNum.incrementAndGet());
-            return base.schedule(task, delay, unit);
+            _tasks.Remove(task);
         }
 
-
-        public Task ScheduleAtFixedRate(ScheduleTask task, long initialDelay,
-                long period, TimeUnit unit)
+        public void Start()
         {
-            task.setId(taskNum.incrementAndGet());
-            return base.scheduleAtFixedRate(task, initialDelay, period, unit);
+            foreach (ScheduleTask task in _tasks) task.Start();
         }
 
-
-        public Task ScheduleWithFixedDelay(ScheduleTask task,
-                long initialDelay, long delay, TimeUnit unit)
+        public void Stop()
         {
-            task.setId(taskNum.incrementAndGet());
-            return base.scheduleWithFixedDelay(task, initialDelay, delay, unit);
+            foreach (ScheduleTask task in _tasks) task.Stop();
+        }
+
+        public void Clear()
+        {
+            _tasks.Clear();
         }
 
     }

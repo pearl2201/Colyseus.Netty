@@ -1,4 +1,5 @@
 using System;
+using Colyseus.Server;
 using MiscUtil.Conversion;
 
 namespace Colyseus.Schema
@@ -22,7 +23,7 @@ namespace Colyseus.Schema
 
 		public byte[] getInitialBytesFromEncodedType(byte[] encodedType)
 		{
-			byte[] initialBytes = { Protocol.ROOM_DATA };
+			byte[] initialBytes = { (byte)Protocol.ROOM_DATA };
 
 			if (encodedType.Length < 0x20)
 			{

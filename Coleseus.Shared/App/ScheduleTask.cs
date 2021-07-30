@@ -17,18 +17,10 @@ namespace Coleseus.Shared.App
  */
     public interface ScheduleTask
     {
-        /**
-		 * @return returns the unique task id of the task. For future
-		 *         implementations, this value has to be unique across multiple
-		 *         server nodes.
-		 */
-        Object getId();
-
-        /**
-         * @param id
-         *            Set the unique task id.
-         */
-        void setId(Object id);
+        Object Id { get; set; }
+        string TaskName { get; set; }
+        TimeSpan TaskTimeSpan { get; set; }
+        bool TaskRunAtStart { get; set; }
 
         /**
       * When an object implementing interface <code>Runnable</code> is used
@@ -41,7 +33,11 @@ namespace Coleseus.Shared.App
       *
       * @see     java.lang.Thread#run()
       */
-        void run();
+        void Execute();
+
+        void Start();
+
+        void Stop();
     }
 
 }
