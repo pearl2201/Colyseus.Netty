@@ -3,8 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Coleseus.Shared.App;
+using Coleseus.Shared.App.Impl;
+using Coleseus.Shared.Protocols.Impl;
 using Coleseus.Shared.Server;
+using Coleseus.Shared.Service;
 using Colyseus.Common;
+using Colyseus.NettyServer.ZombieGame.Domain;
+using Colyseus.NettyServer.ZombieGame.Game;
 using DotNetty.Common.Internal.Logging;
 using DotNetty.Handlers.Logging;
 using DotNetty.Transport.Bootstrapping;
@@ -16,21 +22,32 @@ using Microsoft.Extensions.Logging.Console;
 using Serilog.Events;
 using LogLevel = DotNetty.Handlers.Logging.LogLevel;
 
-namespace Colyseus.NettyServer {
-    public class GammeServerWorker : BackgroundService {
+namespace Colyseus.NettyServer
+{
+    public class GammeServerWorker : BackgroundService
+    {
 
         private readonly ServerManager _serverManager;
         private readonly Serilog.ILogger _logger;
-        public GammeServerWorker (ServerManager serverManager, ILogger<GammeServerWorker> logger) {
+        private readonly TaskManagerService _taskManagerService;
+        private readonly ILookupService _loopupService;
+        public GammeServerWorker(ServerManager serverManager, TaskManagerService taskManagerService, ILookupService loopupService)
+        {
             _serverManager = serverManager;
-            _logger = Serilog.Log.ForContext<GammeServerWorker> ();
+            _logger = Serilog.Log.ForContext<GammeServerWorker>();
+            _taskManagerService = taskManagerService;
+            _loopupService = loopupService;
         }
-        async Task RunServerAsync () {
+        async Task RunServerAsync()
+        {
 
-            try {
-                await _serverManager.startServers ();
-            } catch (Exception e) {
-                _logger.Error ("Unable to start servers cleanly: {}", e);
+            try
+            {
+                await _serverManager.startServers();
+            }
+            catch (Exception e)
+            {
+                _logger.Error("Unable to start servers cleanly: {}", e);
             }
 
             //var logLevel = LogEventLevel.Information;
@@ -74,8 +91,79 @@ namespace Colyseus.NettyServer {
             //}
         }
 
-        protected override async Task ExecuteAsync (CancellationToken stoppingToken) {
-            await RunServerAsync ();
+        public override Task StartAsync(CancellationToken cancellationToken)
+        {
+            StartGames();
+            _taskManagerService.Start();
+            return base.StartAsync(cancellationToken);
+        }
+
+        IGame zombieGame()
+        {
+            IGame game = new SimpleGame(1, "Zombie");
+            return game;
+        }
+
+        World world()
+        {
+            World world = new World();
+            world.setAlive(2000000000);
+            world.setUndead(1);
+            return world;
+        }
+
+
+        Defender defender()
+        {
+            Defender defender = new Defender();
+            defender.setWorld(world());
+            return defender;
+        }
+
+        Zombie zombie()
+        {
+            Zombie zombie = new Zombie();
+            zombie.setWorld(world());
+            return zombie;
+        }
+
+        public void StartGames()
+        {
+            World world = new World();
+            world.setAlive(2000000000);
+            world.setUndead(1);
+
+            List<GameRoom> roomList = new List<GameRoom>(2);
+            for (int i = 1; i <= 2; i++)
+            {
+                GameRoomSessionBuilder sessionBuilder = new GameRoomSessionBuilder();
+                sessionBuilder.SetParentGame(zombieGame())
+                        .SetGameRoomName("Zombie_ROOM_" + i)
+                        .SetProtocol(new MessageBufferProtocol());
+                ZombieRoom room = new ZombieRoom(sessionBuilder);
+                room.setDefender(defender());
+                room.setZombie(zombie());
+                roomList.Add(room);
+                ScheduleTask monitor1 = new WorldMonitor(world, room)
+                {
+                    InitialDelay = TimeSpan.FromMilliseconds(i * 1000),
+                    TaskRunAtStart = true,
+                    TaskTimeSpan = TimeSpan.FromMilliseconds(5000),
+                };
+                _taskManagerService.AddTask(monitor1);
+            }
+        }
+
+        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+        {
+            await RunServerAsync();
+        }
+
+        public override Task StopAsync(CancellationToken cancellationToken)
+        {
+            _taskManagerService.Stop();
+            _serverManager.stopServers();
+            return base.StopAsync(cancellationToken);
         }
     }
 }

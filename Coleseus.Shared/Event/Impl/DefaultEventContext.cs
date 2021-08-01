@@ -10,6 +10,17 @@ namespace Coleseus.Shared.Event.Impl
         private Object attachement;
         private ISession session;
 
+        public DefaultEventContext()
+        {
+
+        }
+
+
+        public DefaultEventContext(ISession session, Object attachement)
+        {
+            this.session = session;
+            this.attachement = attachement;
+        }
 
         public Object getAttachment()
         {

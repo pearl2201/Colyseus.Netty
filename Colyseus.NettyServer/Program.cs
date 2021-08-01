@@ -38,6 +38,7 @@ namespace Colyseus.NettyServer
                 .UseSerilog()
                 .ConfigureServices((hostContext, services) =>
                 {
+                    services.AddSingleton<ILookupService, SimpleLookupService>();
                     services.AddSingleton<ISessionRegistryService<EndPoint>, SessionRegistry<EndPoint>>();
                     services.AddSingleton<NettyConfig>();
                     services.AddSingleton<ProtocolMultiplexerChannelInitializer>();

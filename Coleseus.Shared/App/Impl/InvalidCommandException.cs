@@ -4,9 +4,9 @@ using System.Text;
 
 namespace Coleseus.Shared.App.Impl
 {
-    public class InvalidCommnadException : Exception
+    public class InvalidCommandException : Exception
     {
-        public InvalidCommnadException(string message) : base(message)
+        public InvalidCommandException(string message) : base(message)
         {
 
         }

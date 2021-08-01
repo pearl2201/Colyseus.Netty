@@ -25,7 +25,7 @@ namespace Coleseus.Shared.Event.Impl
     {
         private readonly Serilog.ILogger _logger = Serilog.Log.ForContext<DefaultSessionEventHandler>();
 
-        private readonly ISession session;
+        protected readonly ISession session;
 
         public DefaultSessionEventHandler(ISession session)
         {
@@ -93,7 +93,7 @@ namespace Coleseus.Shared.Event.Impl
             }
         }
 
-        protected void onDataIn(IEvent @event)
+        public virtual void onDataIn(IEvent @event)
         {
             if (null != getSession())
             {

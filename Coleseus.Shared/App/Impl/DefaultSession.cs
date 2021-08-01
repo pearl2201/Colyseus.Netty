@@ -30,7 +30,7 @@ namespace Coleseus.Shared.App.Impl
         /**
          * event dispatcher
          */
-        public IEventDispatcher eventDispatcher { get; private set; }
+        public IEventDispatcher eventDispatcher { get; protected set; }
 
         /**
          * session parameters

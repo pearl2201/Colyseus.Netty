@@ -121,7 +121,7 @@ namespace Coleseus.Shared.App.Impl
 
         protected SessionFactory sessionFactory;
 
-        protected IEventDispatcher eventDispatcher;
+    
 
         private Mutex mute = new Mutex();
 
@@ -137,7 +137,7 @@ namespace Coleseus.Shared.App.Impl
             this._logger = Serilog.Log.ForContext<GameRoomSession>();
             if (null == gameRoomSessionBuilder.eventDispatcher)
             {
-                this.eventDispatcher = new ExecutorEventDispatcher();
+                eventDispatcher = new ExecutorEventDispatcher();
             }
         }
 
