@@ -53,6 +53,8 @@ namespace Coleseus.Shared.Handlers.Netty
             return msg;
         }
 
+        public override bool IsSharable => true;
+
     }
 
 }

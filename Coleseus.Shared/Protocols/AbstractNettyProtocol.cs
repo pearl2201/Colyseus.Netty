@@ -21,7 +21,7 @@ namespace Coleseus.Shared.Protocols
 		 * The name of the protocol. This is set by the child class to appropriate
 		 * value while child class instance is created.
 		 */
-        String protocolName;
+        string protocolName;
 
         /**
          * Name of the idle state check handlers which will be removed by protocol
@@ -41,7 +41,7 @@ namespace Coleseus.Shared.Protocols
         }
 
 
-        public String getProtocolName()
+        public string getProtocolName()
         {
             return protocolName;
         }

@@ -18,6 +18,7 @@ namespace Coleseus.Shared.Handlers.Netty
             @out.WriteBytes(Unpooled.WrappedBuffer(msg, NULL_BUFFER));
         }
 
+        public override bool IsSharable => true;
     }
 
 }

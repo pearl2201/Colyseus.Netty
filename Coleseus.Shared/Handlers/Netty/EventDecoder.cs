@@ -22,6 +22,6 @@ namespace Coleseus.Shared.Handlers.Netty
             IByteBuffer buffer = msg.ReadBytes(msg.ReadableBytes);
             @out.Add(Events.CreateEvent(buffer, opcode));
         }
-
+        public override bool IsSharable => true;
     }
 }

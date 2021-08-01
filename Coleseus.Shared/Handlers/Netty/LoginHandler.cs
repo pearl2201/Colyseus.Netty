@@ -312,6 +312,7 @@ namespace Coleseus.Shared.Handlers.Netty
             this.reconnectRegistry = reconnectRegistry;
         }
 
+        public override bool IsSharable => true;
     }
 
 }

@@ -42,5 +42,7 @@ namespace Coleseus.Shared.Handlers.Netty
             IByteBuffer data = @in.ReadBytes(@in.ReadableBytes);
             return Events.CreateEvent(new NettyMessageBuffer(data), opcode);
         }
+
+        public override bool IsSharable => true;
     }
 }

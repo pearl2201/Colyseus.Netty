@@ -42,7 +42,7 @@ namespace Coleseus.Shared.Event.Impl
                 }
                 else
                 {
-                    if (handlersByEventType.TryGetValue(eventType, out var handlers))
+                    if (!handlersByEventType.TryGetValue(eventType, out var handlers))
                     {
                         handlers = new List<IEventHandler>();
                         this.handlersByEventType.Add(eventType, handlers);

@@ -21,5 +21,6 @@ namespace Coleseus.Shared.Handlers.Netty
             @out.Add(new DatagramPacket(data, clientAddress));
         }
 
+        public override bool IsSharable => true;
     }
 }

@@ -29,7 +29,7 @@ namespace Coleseus.Shared.Handlers.Netty
             }
 
         }
-
+        public override bool IsSharable => true;
     }
 
 }
