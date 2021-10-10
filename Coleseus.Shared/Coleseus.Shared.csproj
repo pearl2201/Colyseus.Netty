@@ -22,8 +22,6 @@
        <PackageReference Include="Serilog" Version="2.10.0" />
   </ItemGroup>
 
-  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="xcopy /y /d  &quot;$(ProjectDir)$(OutDir)Coleseus.Shared.dll&quot; &quot;F:\Kyx\Research\AutoTest\Colyseus\Assets\Plugins&quot;" />
-  </Target>
+  
 
 </Project>

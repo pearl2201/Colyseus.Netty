@@ -44,12 +44,23 @@ namespace Coleseus.Shared.Handlers.Netty
 		 * @author Abraham Menacherry
 		 * 
 		 */
+
+        protected bool IsProtocolPipeline<T>(IChannelPipeline pipeline) where T : class, IChannelHandler
+        {
+            if (pipeline.Get<T>() == null)
+                return false;
+
+            return true;
+        }
     }
 
     public class HTTPProtocol : LoginProtocol
     {
         private WebSocketLoginHandler webSocketLoginHandler;
-
+        public HTTPProtocol(WebSocketLoginHandler webSocketLoginHandler)
+        {
+            this.webSocketLoginHandler = webSocketLoginHandler;
+        }
         public override bool applyProtocol(IByteBuffer buffer,
                 IChannelPipeline pipeline)
         {
@@ -58,11 +69,15 @@ namespace Coleseus.Shared.Handlers.Netty
             int magic2 = buffer.GetByte(buffer.ReaderIndex + 1);
             if (isHttp(magic1, magic2))
             {
-                pipeline.AddLast("decoder", new HttpRequestDecoder());
-                pipeline.AddLast("aggregator", new HttpObjectAggregator(65536));
-                pipeline.AddLast("encoder", new HttpResponseEncoder());
-                pipeline.AddLast("handler", new WebSocketServerProtocolHandler("/nadsocket"));
-                pipeline.AddLast(LOGIN_HANDLER_NAME, webSocketLoginHandler);
+                if (!IsProtocolPipeline<WebSocketServerProtocolHandler>(pipeline))
+                {
+                    pipeline.AddLast("decoder", new HttpRequestDecoder());
+                    pipeline.AddLast("aggregator", new HttpObjectAggregator(65536));
+                    pipeline.AddLast("encoder", new HttpResponseEncoder());
+                    pipeline.AddLast("handler", new WebSocketServerProtocolHandler("/nadsocket"));
+                    pipeline.AddLast(LOGIN_HANDLER_NAME, webSocketLoginHandler);
+                }
+
                 isThisProtocol = true;
             }
             return isThisProtocol;
@@ -121,7 +136,12 @@ namespace Coleseus.Shared.Handlers.Netty
         private LoginHandler loginHandler;
         private LengthFieldPrepender lengthFieldPrepender;
 
-
+        public DefaultNadProtocol(EventDecoder eventDecoder, LoginHandler loginHandler, LengthFieldPrepender lengthFieldPrepender)
+        {
+            this.eventDecoder = eventDecoder;
+            this.loginHandler = loginHandler;
+            this.lengthFieldPrepender = lengthFieldPrepender;
+        }
         public override bool applyProtocol(IByteBuffer buffer,
                 IChannelPipeline pipeline)
         {
@@ -131,10 +151,14 @@ namespace Coleseus.Shared.Handlers.Netty
                    .ReaderIndex + 3);
             if (isNadProtocol(opcode, protocolVersion))
             {
-                pipeline.AddLast("framer", createLengthBasedFrameDecoder());
-                pipeline.AddLast("eventDecoder", eventDecoder);
-                pipeline.AddLast(LOGIN_HANDLER_NAME, loginHandler);
-                pipeline.AddLast("lengthFieldPrepender", lengthFieldPrepender);
+                if (!IsProtocolPipeline<LoginHandler>(pipeline))
+                {
+                    pipeline.AddLast("framer", createLengthBasedFrameDecoder());
+                    pipeline.AddLast("eventDecoder", eventDecoder);
+                    pipeline.AddLast(LOGIN_HANDLER_NAME, loginHandler);
+                    pipeline.AddLast("lengthFieldPrepender", new LengthFieldPrepender(2, false));
+                }
+
                 isThisProtocol = true;
             }
             return isThisProtocol;
@@ -197,7 +221,7 @@ namespace Coleseus.Shared.Handlers.Netty
         private List<LoginProtocol> protocols;
 
 
-      
+
 
         public List<LoginProtocol> getProtocols()
         {

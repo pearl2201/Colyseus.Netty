@@ -15,8 +15,12 @@ namespace Coleseus.Shared.Server.Netty
         private int bytesForProtocolCheck;
         private LoginProtocol loginProtocol;
 
+        public ProtocolMultiplexerChannelInitializer(int bytesForProtocolCheck, LoginProtocol loginProtocol)
+        {
+            this.bytesForProtocolCheck = bytesForProtocolCheck;
+            this.loginProtocol = loginProtocol;
+        }
 
-     
 
         protected IChannelHandler createProtcolMultiplexerDecoder()
         {

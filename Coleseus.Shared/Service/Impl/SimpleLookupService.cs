@@ -40,6 +40,8 @@ namespace Coleseus.Shared.Service.Impl
 
         public override GameRoom gameRoomLookup(Object gameContextKey)
         {
+            Console.WriteLine(string.Join(",", this.refKeyGameRoomMap.Keys));
+            Console.WriteLine("GameContextKey: " + (string)gameContextKey);
             return refKeyGameRoomMap[(string)gameContextKey];
         }
 
@@ -54,6 +56,9 @@ namespace Coleseus.Shared.Service.Impl
             return refKeyGameRoomMap;
         }
 
-
+        public override void setGameRoomLookup(Dictionary<string, GameRoom> rooms)
+        {
+            refKeyGameRoomMap = rooms;
+        }
     }
 }

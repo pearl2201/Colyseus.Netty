@@ -45,7 +45,7 @@ namespace Coleseus.Shared.Protocols.Impl
             // Downstream handlers - Filter for data which flows from server to
             // client. Note that the last handler added is actually the first
             // handler for outgoing data.
-            pipeline.AddLast("lengthFieldPrepender", lengthFieldPrepender);
+            pipeline.AddLast("lengthFieldPrepender", new LengthFieldPrepender(2,2));
             pipeline.AddLast("messageBufferEventEncoder", messageBufferEventEncoder);
 
         }

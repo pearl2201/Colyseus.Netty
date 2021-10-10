@@ -19,6 +19,8 @@ namespace Coleseus.Shared.Service
 		 */
         public abstract GameRoom gameRoomLookup(Object gameContextKey);
 
+		public abstract void setGameRoomLookup(Dictionary<string, GameRoom> rooms);
+
         /**
 		 * Get a game based on a reference key. This allows the player session to
 		 * get its associated game.

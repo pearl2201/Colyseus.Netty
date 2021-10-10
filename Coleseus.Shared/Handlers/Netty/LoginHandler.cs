@@ -8,11 +8,8 @@ using Coleseus.Shared.Service.Impl;
 using Coleseus.Shared.Util;
 using DotNetty.Buffers;
 using DotNetty.Transport.Channels;
-using Microsoft.Extensions.Logging;
 using System;
-using System.Collections.Generic;
 using System.Net;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -39,6 +36,8 @@ namespace Coleseus.Shared.Handlers.Netty
         protected override void ChannelRead0(IChannelHandlerContext ctx,
                 IEvent @event)
         {
+
+            _logger.Debug("ChannelRead0");
             IByteBuffer buffer = (IByteBuffer)@event.getSource();
             IChannel channel = ctx.Channel;
             int type = @event.getType();
@@ -67,8 +66,14 @@ namespace Coleseus.Shared.Handlers.Netty
                             channel});
                 closeChannelWithLoginFailure(channel).Wait();
             }
+            Console.WriteLine("Finished");
         }
 
+        //public override void ChannelReadComplete(IChannelHandlerContext context)
+        //{
+        //    _logger.Error("Channel read complate");
+        //    context.Flush();
+        //}
 
         public override void ExceptionCaught(IChannelHandlerContext context, Exception exception)
 
@@ -130,9 +135,14 @@ namespace Coleseus.Shared.Handlers.Netty
         {
             if (null != player)
             {
-                ctx.Channel.WriteAsync(NettyUtils
-                        .createBufferForOpcode(Events.LOG_IN_SUCCESS)).Wait();
+
+
+                ctx.Channel.WriteAndFlushAsync(NettyUtils
+           .createBufferForOpcode(Events.LOG_IN_SUCCESS)).Wait();
+
                 handleGameRoomJoin(player, ctx, buffer);
+
+
             }
             else
             {
@@ -178,6 +188,8 @@ namespace Coleseus.Shared.Handlers.Netty
 
         }
 
+
+
         public void handleGameRoomJoin(IPlayer player, IChannelHandlerContext ctx, IByteBuffer buffer)
         {
             String refKey = NettyUtils.readString(buffer);
@@ -186,8 +198,8 @@ namespace Coleseus.Shared.Handlers.Netty
             if (null != gameRoom)
             {
                 IPlayerSession playerSession = gameRoom.createPlayerSession(player);
-                String reconnectKey = (String)idGeneratorService
-                        .generateFor(playerSession.GetType());
+                String reconnectKey = idGeneratorService
+                        .generateFor(playerSession.GetType()).ToString();
                 playerSession.setAttribute(ColyseusConfig.RECONNECT_KEY, reconnectKey);
                 playerSession.setAttribute(ColyseusConfig.RECONNECT_REGISTRY, reconnectRegistry);
                 _logger.Debug("Sending GAME_ROOM_JOIN_SUCCESS to channel {}", channel);

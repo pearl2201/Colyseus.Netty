@@ -129,6 +129,10 @@ namespace Colyseus.NettyServer
 
         public void StartGames()
         {
+            var protocol = new MessageBufferProtocol();
+            protocol.setLengthFieldPrepender(new DotNetty.Codecs.LengthFieldPrepender(2, 2));
+            protocol.setMessageBufferEventDecoder(new Coleseus.Shared.Handlers.Netty.MessageBufferEventDecoder());
+            protocol.setMessageBufferEventEncoder(new Coleseus.Shared.Handlers.Netty.MessageBufferEventEncoder());
             World world = new World();
             world.setAlive(2000000000);
             world.setUndead(1);
@@ -139,7 +143,7 @@ namespace Colyseus.NettyServer
                 GameRoomSessionBuilder sessionBuilder = new GameRoomSessionBuilder();
                 sessionBuilder.SetParentGame(zombieGame())
                         .SetGameRoomName("Zombie_ROOM_" + i)
-                        .SetProtocol(new MessageBufferProtocol());
+                        .SetProtocol(protocol);
                 ZombieRoom room = new ZombieRoom(sessionBuilder);
                 room.setDefender(defender());
                 room.setZombie(zombie());
@@ -152,6 +156,17 @@ namespace Colyseus.NettyServer
                 };
                 _taskManagerService.AddTask(monitor1);
             }
+
+            Dictionary<String, GameRoom> refKeyGameRoomMap = new Dictionary<String, GameRoom>();
+            List<GameRoom> zombieRooms = roomList;
+            foreach (GameRoom room in zombieRooms)
+            {
+                refKeyGameRoomMap.Add(room.getGameRoomName(), room);
+            }
+            //refKeyGameRoomMap.Add("Zombie_ROOM_1_REF_KEY_2", zombieRoom2());
+            //refKeyGameRoomMap.Add("LDGameRoom", ldGameRoom());
+            //refKeyGameRoomMap.Add("LDGameRoomForNettyClient", ldGameRoomForNettyClient());
+            _loopupService.setGameRoomLookup(refKeyGameRoomMap);
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)

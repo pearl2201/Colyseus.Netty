@@ -48,7 +48,7 @@ namespace Coleseus.Shared.Server.Netty
                             .Channel<TcpServerSocketChannel>()
                     .ChildHandler(getChannelInitializer());
                 IChannel serverChannel = await serverBootstrap.BindAsync(nettyConfig.getSocketAddress());
-
+                _logger.LogInformation(ToString());
                 ALL_CHANNELS.Add(serverChannel);
             }
             catch (Exception e)
