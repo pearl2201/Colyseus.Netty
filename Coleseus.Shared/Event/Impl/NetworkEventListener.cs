@@ -20,18 +20,18 @@ namespace Coleseus.Shared.Event.Impl
     {
 
         private const int EVENT_TYPE = Events.NETWORK_MESSAGE;
-        private readonly ISession session;
+        public ISession Session { get; set; }
 
         public NetworkEventListener(ISession session)
         {
-            this.session = session;
+            this.Session = session;
         }
 
 
         public void onEvent(IEvent @event)
 
         {
-            session.onEvent(@event);
+            Session.OnEvent(@event);
         }
 
 
@@ -41,18 +41,15 @@ namespace Coleseus.Shared.Event.Impl
         }
 
 
-        public ISession getSession()
-        {
-            return session;
-        }
 
 
-        public void setSession(ISession session)
-        {
-            throw new Exception(
-                    "Session is a final field in this class. "
-                            + "It cannot be reset");
-        }
+
+        //public void setSession(ISession session)
+        //{
+        //    throw new Exception(
+        //            "Session is a final field in this class. "
+        //                    + "It cannot be reset");
+        //}
 
     }
 }

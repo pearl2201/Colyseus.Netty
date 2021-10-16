@@ -42,23 +42,19 @@ namespace Coleseus.Shared.Handlers.Netty
             IChannel channel = ctx.Channel;
             int type = @event.getType();
             if (Events.LOG_IN == type)
-
             {
                 _logger.Debug("Login attempt from {}", channel.RemoteAddress);
                 IPlayer player = lookupPlayer(buffer, channel);
                 handleLogin(player, ctx, buffer);
             }
             else if (Events.RECONNECT == type)
-
             {
                 _logger.Debug("Reconnect attempt from {}", channel.RemoteAddress);
                 String reconnectKey = NettyUtils.readString(buffer);
                 IPlayerSession playerSession = lookupSession(reconnectKey);
                 handleReconnect(playerSession, ctx, buffer);
             }
-
             else
-
             {
                 _logger.Error("Invalid @event {} sent from remote address {}. "
                         + "Going to close channel {}",
@@ -118,9 +114,9 @@ namespace Coleseus.Shared.Handlers.Netty
                     // if its an already active session then do not allow a
                     // reconnect. So the only state in which a client is allowed to
                     // reconnect is if it is "NOT_CONNECTED"
-                    if (playerSession.status == SessionStatus.NOT_CONNECTED)
+                    if (playerSession.Status == SessionStatus.NOT_CONNECTED)
                     {
-                        playerSession.status = SessionStatus.CONNECTING;
+                        playerSession.Status = SessionStatus.CONNECTING;
                     }
                     else
                     {
@@ -159,11 +155,11 @@ namespace Coleseus.Shared.Handlers.Netty
                         .createBufferForOpcode(Events.LOG_IN_SUCCESS)).Wait();
                 GameRoom gameRoom = playerSession.getGameRoom();
                 gameRoom.disconnectSession(playerSession);
-                if (null != playerSession.getTcpSender())
-                    playerSession.getTcpSender().close();
+                if (null != playerSession.TcpSender)
+                    playerSession.TcpSender.close();
 
-                if (null != playerSession.getUdpSender())
-                    playerSession.getUdpSender().close();
+                if (null != playerSession.UdpSender)
+                    playerSession.UdpSender.close();
 
                 handleReJoin(playerSession, gameRoom, ctx.Channel, buffer);
             }
@@ -200,8 +196,8 @@ namespace Coleseus.Shared.Handlers.Netty
                 IPlayerSession playerSession = gameRoom.createPlayerSession(player);
                 String reconnectKey = idGeneratorService
                         .generateFor(playerSession.GetType()).ToString();
-                playerSession.setAttribute(ColyseusConfig.RECONNECT_KEY, reconnectKey);
-                playerSession.setAttribute(ColyseusConfig.RECONNECT_REGISTRY, reconnectRegistry);
+                playerSession.SetAttribute(ColyseusConfig.RECONNECT_KEY, reconnectKey);
+                playerSession.SetAttribute(ColyseusConfig.RECONNECT_REGISTRY, reconnectRegistry);
                 _logger.Debug("Sending GAME_ROOM_JOIN_SUCCESS to channel {}", channel);
                 IByteBuffer reconnectKeyBuffer = Unpooled.WrappedBuffer(NettyUtils.createBufferForOpcode(Events.GAME_ROOM_JOIN_SUCCESS),
                                 NettyUtils.WriteString(reconnectKey));
@@ -226,12 +222,12 @@ namespace Coleseus.Shared.Handlers.Netty
             NettyUtils.clearPipeline(channel.Pipeline);
             // Set the tcp channel on the session. 
             NettyTCPMessageSender sender = new NettyTCPMessageSender(channel);
-            playerSession.setTcpSender(sender);
+            playerSession.TcpSender = sender;
             // Connect the pipeline to the game room.
             gameRoom.connectSession(playerSession);
-            playerSession.isWriteable = true;// TODO remove if unnecessary. It should be done in start @event
+            playerSession.IsWriteable = true;// TODO remove if unnecessary. It should be done in start @event
                                              // Send the re-connect @event so that it will in turn send the START @event.
-            playerSession.onEvent(new ReconnetEvent(sender));
+            playerSession.OnEvent(new ReconnetEvent(sender));
             loginUdp(playerSession, buffer);
         }
 
@@ -248,11 +244,14 @@ namespace Coleseus.Shared.Handlers.Netty
                     NettyUtils.clearPipeline(channel.Pipeline);
                     // Set the tcp channel on the session. 
                     NettyTCPMessageSender tcpSender = new NettyTCPMessageSender(channel);
-                    playerSession.setTcpSender(tcpSender);
+                    playerSession.TcpSender = tcpSender;
                     // Connect the pipeline to the game room.
                     gameRoom.connectSession(playerSession);
                     // send the start @event to remote client.
-                    tcpSender.sendMessage(Events.CreateEvent(null, Events.START));
+                    //MessageBuffer<IByteBuffer> messageBuffer = new NettyMessageBuffer();
+                    //messageBuffer.writeString("Start");
+                    //tcpSender.sendMessage(Events.CreateEvent(messageBuffer, Events.START));
+                    tcpSender.sendMessage(Events.CreateEvent(null,Events.START));
                     gameRoom.onLogin(playerSession);
                 }
                 else
@@ -261,7 +260,6 @@ namespace Coleseus.Shared.Handlers.Netty
                     channel.CloseAsync().Wait();
                 }
             });
-
         }
 
         /**

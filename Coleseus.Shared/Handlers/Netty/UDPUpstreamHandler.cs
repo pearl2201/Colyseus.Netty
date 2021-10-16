@@ -43,17 +43,17 @@ namespace Coleseus.Shared.Handlers.Netty
 
                 // If the session's UDP has not been connected yet then send a
                 // CONNECT event.
-                if (!session.isUDPEnabled)
+                if (!session.IsUDPEnabled)
                 {
-                    if (null == session.getAttribute(UDP_CONNECTING)
-                            || (!(Boolean)session.getAttribute(UDP_CONNECTING)))
+                    if (null == session.GetAttribute(UDP_CONNECTING)
+                            || (!(Boolean)session.GetAttribute(UDP_CONNECTING)))
                     {
-                        session.setAttribute(UDP_CONNECTING, true);
+                        session.SetAttribute(UDP_CONNECTING, true);
                         @event = getUDPConnectEvent(@event, remoteAddress,
 
                                 (SocketDatagramChannel)ctx.Channel);
                         // Pass the connect event on to the session
-                        session.onEvent(@event);
+                        session.OnEvent(@event);
                     }
                     else
                     {
@@ -75,7 +75,7 @@ namespace Coleseus.Shared.Handlers.Netty
 
                 {
                     // Pass the original event on to the session
-                    session.onEvent(@event);
+                    session.OnEvent(@event);
                 }
             }
 

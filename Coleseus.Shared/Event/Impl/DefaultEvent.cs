@@ -1,4 +1,7 @@
-﻿using System;
+﻿using Coleseus.Shared.Communication;
+using Coleseus.Shared.Handlers.Netty;
+using DotNetty.Buffers;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -66,6 +69,22 @@ namespace Coleseus.Shared.Event.Impl
         {
             return "Event [type=" + type + ", source=" + source + ", timeStamp="
                     + timeStamp + "]";
+        }
+
+        public virtual MessageBuffer<IByteBuffer> getSourceBuffer()
+        {
+            if (source is IDataBufferSchema bufferSchema)
+            {
+                return bufferSchema.ToMessageBuffer();
+            }
+            return (MessageBuffer<IByteBuffer>)source;
+        }
+
+        public virtual IByteBuffer getBufferData()
+        {
+            MessageBuffer<IByteBuffer> msgBuffer = getSourceBuffer();
+            IByteBuffer data = msgBuffer.getNativeBuffer();
+            return data;
         }
     }
 }

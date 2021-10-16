@@ -89,9 +89,9 @@ namespace Coleseus.Shared.Handlers.Netty
                     // if its an already active session then do not allow a
                     // reconnect. So the only state in which a client is allowed to
                     // reconnect is if it is "NOT_CONNECTED"
-                    if (playerSession.status == SessionStatus.NOT_CONNECTED)
+                    if (playerSession.Status == SessionStatus.NOT_CONNECTED)
                     {
-                        playerSession.status = SessionStatus.CONNECTING;
+                        playerSession.Status = SessionStatus.CONNECTING;
                     }
                     else
                     {
@@ -110,8 +110,8 @@ namespace Coleseus.Shared.Handlers.Netty
                 await channel.WriteAndFlushAsync(eventToFrame(Events.LOG_IN_SUCCESS, null));
                 GameRoom gameRoom = playerSession.getGameRoom();
                 gameRoom.disconnectSession(playerSession);
-                if (null != playerSession.getTcpSender())
-                    playerSession.getTcpSender().close();
+                if (null != playerSession.TcpSender)
+                    playerSession.TcpSender.close();
 
                 handleReJoin(playerSession, gameRoom, channel).Wait();
             }
@@ -127,13 +127,13 @@ namespace Coleseus.Shared.Handlers.Netty
         {
             // Set the tcp channel on the session. 
             NettyTCPMessageSender sender = new NettyTCPMessageSender(channel);
-            playerSession.setTcpSender(sender);
+            playerSession.TcpSender = sender;
             // Connect the pipeline to the game room.
             gameRoom.connectSession(playerSession);
             await channel.WriteAndFlushAsync(Events.GAME_ROOM_JOIN_SUCCESS);//assumes that the protocol applied will take care of event objects.
-            playerSession.isWriteable = true;// TODO remove if unnecessary. It should be done in start event
+            playerSession.IsWriteable = true;// TODO remove if unnecessary. It should be done in start event
                                              // Send the re-connect event so that it will in turn send the START event.
-            playerSession.onEvent(new ReconnetEvent(sender));
+            playerSession.OnEvent(new ReconnetEvent(sender));
         }
 
         public IPlayer lookupPlayer(string username, string password)
@@ -177,13 +177,13 @@ namespace Coleseus.Shared.Handlers.Netty
                 IPlayerSession playerSession = gameRoom.createPlayerSession(player);
                 String reconnectKey = (String)idGeneratorService
                         .generateFor(playerSession.GetType());
-                playerSession.setAttribute(ColyseusConfig.RECONNECT_KEY, reconnectKey);
-                playerSession.setAttribute(ColyseusConfig.RECONNECT_REGISTRY, reconnectRegistry);
+                playerSession.SetAttribute(ColyseusConfig.RECONNECT_KEY, reconnectKey);
+                playerSession.SetAttribute(ColyseusConfig.RECONNECT_REGISTRY, reconnectRegistry);
                 _logger.Verbose("Sending GAME_ROOM_JOIN_SUCCESS to channel {}",
                         channel);
                 var task = channel.WriteAndFlushAsync(eventToFrame(
                         Events.GAME_ROOM_JOIN_SUCCESS, reconnectKey));
-                connectToGameRoom(gameRoom, playerSession, task,channel);
+                connectToGameRoom(gameRoom, playerSession, task, channel);
             }
             else
 
@@ -198,11 +198,11 @@ namespace Coleseus.Shared.Handlers.Netty
         }
 
         public void connectToGameRoom(GameRoom gameRoom,
-                 IPlayerSession playerSession, Task future,IChannel channel)
+                 IPlayerSession playerSession, Task future, IChannel channel)
         {
             future.ContinueWith((x) =>
             {
-               
+
                 _logger.Verbose(
                         "Sending GAME_ROOM_JOIN_SUCCESS to channel {} completed",
                         channel);
@@ -211,7 +211,7 @@ namespace Coleseus.Shared.Handlers.Netty
                     // Set the tcp channel on the session.
                     NettyTCPMessageSender tcpSender = new NettyTCPMessageSender(
                             channel);
-                    playerSession.setTcpSender(tcpSender);
+                    playerSession.TcpSender = tcpSender;
                     // Connect the pipeline to the game room.
                     gameRoom.connectSession(playerSession);
                     // send the start event to remote client.

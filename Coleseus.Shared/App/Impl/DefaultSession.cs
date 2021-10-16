@@ -30,32 +30,32 @@ namespace Coleseus.Shared.App.Impl
         /**
          * event dispatcher
          */
-        public IEventDispatcher eventDispatcher { get; protected set; }
+        public IEventDispatcher EventDispatcher { get; protected set; }
 
         /**
          * session parameters
          */
         protected Dictionary<String, Object> sessionAttributes;
 
-        public DateTime creationTime { get; protected set; }
+        public DateTime CreationTime { get; protected set; }
 
-        public DateTime lastReadWriteTime { get; set; }
+        public DateTime LastReadWriteTime { get; set; }
 
-        public SessionStatus status { get; set; }
+        public SessionStatus Status { get; set; }
 
-        public bool isWriteable { get; set; }
+        public bool IsWriteable { get; set; }
 
         /**
          * Life cycle variable to check if the session is shutting down. If it is, then no
          * more incoming events will be accepted.
          */
-        public bool isShuttingDown { get; protected set; }
+        public bool IsShuttingDown { get; protected set; }
 
-        public bool isUDPEnabled { get; set; }
+        public bool IsUDPEnabled { get; set; }
 
-        protected Reliable tcpSender = null;
+        public Reliable TcpSender { get; set; } = null ;
 
-        protected Fast udpSender = null;
+        public Fast UdpSender { get; set; } = null;
 
         public DefaultSession(SessionBuilder sessionBuilder)
         {
@@ -64,34 +64,34 @@ namespace Coleseus.Shared.App.Impl
             // meant to be overriden and this could be easier.
             sessionBuilder.validateAndSetValues();
             this.id = sessionBuilder.id;
-            this.eventDispatcher = sessionBuilder.eventDispatcher;
+            this.EventDispatcher = sessionBuilder.eventDispatcher;
             this.sessionAttributes = sessionBuilder.sessionAttributes;
-            this.creationTime = sessionBuilder.creationTime;
-            this.status = sessionBuilder.status;
-            this.lastReadWriteTime = sessionBuilder.lastReadWriteTime;
-            this.isWriteable = sessionBuilder.isWriteable;
-            this.isShuttingDown = sessionBuilder.isShuttingDown;
-            this.isUDPEnabled = sessionBuilder.isUDPEnabled;
+            this.CreationTime = sessionBuilder.creationTime;
+            this.Status = sessionBuilder.status;
+            this.LastReadWriteTime = sessionBuilder.lastReadWriteTime;
+            this.IsWriteable = sessionBuilder.isWriteable;
+            this.IsShuttingDown = sessionBuilder.isShuttingDown;
+            this.IsUDPEnabled = sessionBuilder.isUDPEnabled;
         }
 
 
 
-        public void onEvent(IEvent @event)
+        public void OnEvent(IEvent @event)
         {
-            if (!isShuttingDown)
+            if (!IsShuttingDown)
             {
-                eventDispatcher.fireEvent(@event);
+                EventDispatcher.fireEvent(@event);
             }
         }
 
 
-        public Object getId()
+        public Object GetId()
         {
             return id;
         }
 
 
-        public void setId(Object id)
+        public void SetId(Object id)
         {
             throw new ArgumentException("id cannot be set in this implementation, since it is final");
         }
@@ -100,37 +100,37 @@ namespace Coleseus.Shared.App.Impl
 
 
 
-        public void addHandler(IEventHandler eventHandler)
+        public void AddHandler(IEventHandler eventHandler)
         {
-            eventDispatcher.addHandler(eventHandler);
+            EventDispatcher.addHandler(eventHandler);
         }
 
 
-        public void removeHandler(IEventHandler eventHandler)
+        public void RemoveHandler(IEventHandler eventHandler)
         {
-            eventDispatcher.removeHandler(eventHandler);
+            EventDispatcher.removeHandler(eventHandler);
         }
 
 
-        public List<IEventHandler> getEventHandlers(int eventType)
+        public List<IEventHandler> GetEventHandlers(int eventType)
         {
-            return eventDispatcher.getHandlers(eventType);
+            return EventDispatcher.getHandlers(eventType);
         }
 
 
-        public Object getAttribute(string key)
+        public Object GetAttribute(string key)
         {
             return sessionAttributes[key];
         }
 
 
-        public void removeAttribute(String key)
+        public void RemoveAttribute(String key)
         {
             sessionAttributes.Remove(key);
         }
 
 
-        public void setAttribute(String key, Object value)
+        public void SetAttribute(String key, Object value)
         {
             sessionAttributes.Add(key, value);
         }
@@ -142,9 +142,9 @@ namespace Coleseus.Shared.App.Impl
 
 
 
-        public bool isConnected()
+        public bool IsConnected()
         {
-            return this.status == SessionStatus.CONNECTED;
+            return this.Status == SessionStatus.CONNECTED;
         }
 
 
@@ -158,21 +158,21 @@ namespace Coleseus.Shared.App.Impl
 
 
         [MethodImpl(MethodImplOptions.Synchronized)]
-        public virtual void close()
+        public virtual void Close()
         {
-            isShuttingDown = true;
-            eventDispatcher.close();
-            if (null != tcpSender)
+            IsShuttingDown = true;
+            EventDispatcher.close();
+            if (null != TcpSender)
             {
-                tcpSender.close();
-                tcpSender = null;
+                TcpSender.close();
+                TcpSender = null;
             }
-            if (null != udpSender)
+            if (null != UdpSender)
             {
-                udpSender.close();
-                udpSender = null;
+                UdpSender.close();
+                UdpSender = null;
             }
-            this.status = SessionStatus.CLOSED;
+            this.Status = SessionStatus.CLOSED;
         }
 
 
@@ -213,28 +213,10 @@ namespace Coleseus.Shared.App.Impl
         }
 
 
-        public Reliable getTcpSender()
-        {
-            return tcpSender;
-        }
+  
 
 
-        public void setTcpSender(Reliable tcpSender)
-        {
-            this.tcpSender = tcpSender;
-        }
-
-
-        public Fast getUdpSender()
-        {
-            return udpSender;
-        }
-
-
-        public void setUdpSender(Fast udpSender)
-        {
-            this.udpSender = udpSender;
-        }
+  
     }
 
     /**

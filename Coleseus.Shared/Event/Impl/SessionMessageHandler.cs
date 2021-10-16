@@ -16,11 +16,11 @@ namespace Coleseus.Shared.Event.Impl
     public abstract class SessionMessageHandler : SessionEventHandler
     {
 
-        private readonly ISession session;
+        public ISession Session { get; set; }
 
         public SessionMessageHandler(ISession session)
         {
-            this.session = session;
+            Session = session;
         }
 
 
@@ -30,17 +30,7 @@ namespace Coleseus.Shared.Event.Impl
         }
 
 
-        public ISession getSession()
-        {
-            return session;
-        }
 
-
-        public void setSession(ISession session)
-        {
-            throw new MissingMethodException(
-                    "Session instance is final and cannot be reset on this handler");
-        }
 
         public abstract void onEvent(IEvent @event);
 

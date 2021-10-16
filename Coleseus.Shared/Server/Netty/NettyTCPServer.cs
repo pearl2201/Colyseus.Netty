@@ -45,8 +45,12 @@ namespace Coleseus.Shared.Server.Netty
                     }
                 }
                 serverBootstrap.Group(getBossGroup(), getWorkerGroup())
-                            .Channel<TcpServerSocketChannel>()
-                    .ChildHandler(getChannelInitializer());
+                         .Channel<TcpServerSocketChannel>();
+                serverBootstrap.Option(ChannelOption.SoBacklog, 100).Option(ChannelOption.SoKeepalive, true).Option(ChannelOption.TcpNodelay,true);
+
+          
+
+                serverBootstrap.ChildHandler(getChannelInitializer());
                 IChannel serverChannel = await serverBootstrap.BindAsync(nettyConfig.getSocketAddress());
                 _logger.LogInformation(ToString());
                 ALL_CHANNELS.Add(serverChannel);

@@ -104,7 +104,7 @@ namespace Colyseus.NettyServer.ZombieGame.Game
 
             if (isWebSocketProtocol)
             {
-                getSession().onEvent(Events.NetworkEvent(cmdCount));
+                Session.OnEvent(Events.NetworkEvent(cmdCount));
             }
             else if ((cmdCount % 10000) == 0)
 
@@ -116,7 +116,15 @@ namespace Colyseus.NettyServer.ZombieGame.Game
                 //			getSession().onEvent(tcpEvent);
                 INetworkEvent udpEvent = null;
                 udpEvent = Events.NetworkEvent(buffer, DeliveryGuaranty.FAST);
-                getSession().onEvent(udpEvent);
+                Session.OnEvent(udpEvent);
+            }
+            else
+            {
+                NettyMessageBuffer buffer = new NettyMessageBuffer();
+
+                buffer.writeInt(cmdCount);
+                var udpEvent = Events.NetworkEvent(buffer, DeliveryGuaranty.FAST);
+                Session.TcpSender.sendMessage(udpEvent);
             }
         }
 

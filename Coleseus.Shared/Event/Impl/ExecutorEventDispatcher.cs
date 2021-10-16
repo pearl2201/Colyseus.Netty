@@ -112,7 +112,7 @@ namespace Coleseus.Shared.Event.Impl
                         if (handler is SessionEventHandler)
                         {
                             SessionEventHandler sessionHandler = (SessionEventHandler)handler;
-                            if (sessionHandler.getSession().Equals(session))
+                            if (sessionHandler.Session.Equals(session))
                             {
                                 removeList.Add(handler);
                             }
@@ -164,7 +164,7 @@ namespace Coleseus.Shared.Event.Impl
 
                     if (handlersByEventType.TryGetValue(@event.getType(), out var handlers))
                     {
-                        foreach (IEventHandler handler in handlers)
+                        foreach (IEventHandler handler in handlers.ToArray())
                         {
                             handler.onEvent(@event);
                         }

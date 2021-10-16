@@ -14,7 +14,6 @@ namespace Coleseus.Shared.Event
  */
     public interface SessionEventHandler: IEventHandler
     {
-        ISession getSession();
-        void setSession(ISession session);
+        ISession Session { get; set; }
     }
 }

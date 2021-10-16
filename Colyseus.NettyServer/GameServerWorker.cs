@@ -9,6 +9,7 @@ using Coleseus.Shared.Protocols.Impl;
 using Coleseus.Shared.Server;
 using Coleseus.Shared.Service;
 using Colyseus.Common;
+using Colyseus.NettyServer.LostDecade;
 using Colyseus.NettyServer.ZombieGame.Domain;
 using Colyseus.NettyServer.ZombieGame.Game;
 using DotNetty.Common.Internal.Logging;
@@ -166,6 +167,16 @@ namespace Colyseus.NettyServer
             //refKeyGameRoomMap.Add("Zombie_ROOM_1_REF_KEY_2", zombieRoom2());
             //refKeyGameRoomMap.Add("LDGameRoom", ldGameRoom());
             //refKeyGameRoomMap.Add("LDGameRoomForNettyClient", ldGameRoomForNettyClient());
+            {
+                GameRoomSessionBuilder sessionBuilder = new GameRoomSessionBuilder();
+                sessionBuilder.SetParentGame(new SimpleGame(2, "LDGame")).SetGameRoomName("LDGameRoom")
+                        .SetProtocol(protocol);
+                LDRoom ldroom = new LDRoom(sessionBuilder);
+                refKeyGameRoomMap.Add("LDGameRoom", ldroom);
+            }
+        
+
+
             _loopupService.setGameRoomLookup(refKeyGameRoomMap);
         }
 

@@ -134,7 +134,7 @@ namespace Coleseus.Shared.App.Impl
         public void logout(IPlayerSession session)
         {
             mut.WaitOne();
-            session.close();
+            session.Close();
             if (null != playerSessions)
             {
                 playerSessions.Remove(session);

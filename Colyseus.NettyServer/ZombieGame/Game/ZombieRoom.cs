@@ -33,7 +33,7 @@ namespace Colyseus.NettyServer.ZombieGame.Game
         {
             SessionHandler listener = new SessionHandler(playerSession, defender, zombie,
                     IAM.ZOMBIE);
-            playerSession.addHandler(listener);
+            playerSession.AddHandler(listener);
             _logger.Verbose("Added event listener in Zombie Room");
         }
 

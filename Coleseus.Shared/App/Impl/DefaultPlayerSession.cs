@@ -77,11 +77,11 @@ namespace Coleseus.Shared.App.Impl
 
 
         [MethodImpl(MethodImplOptions.Synchronized)]
-        public override void close()
+        public override void Close()
         {
-            if (!isShuttingDown)
+            if (!IsShuttingDown)
             {
-                base.close();
+                base.Close();
                 parentGameRoom.disconnectSession(this);
             }
         }
@@ -97,7 +97,7 @@ namespace Coleseus.Shared.App.Impl
         {
             return "PlayerSession [id=" + id + "player=" + player
                     + ", parentGameRoom=" + parentGameRoom + ", protocol="
-                    + protocol + ", isShuttingDown=" + isShuttingDown + "]";
+                    + protocol + ", isShuttingDown=" + IsShuttingDown + "]";
         }
     }
 

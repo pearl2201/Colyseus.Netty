@@ -19,12 +19,12 @@ namespace Coleseus.Shared.Server.Netty
 	 */
     public class NettyUDPServer : AbstractNettyServer
     {
-        
+
 
         private Bootstrap serverBootstrap;
 
         public NettyUDPServer(NettyConfig nettyConfig,
-                UDPChannelInitializer channelInitializer,ILogger<NettyUDPServer> logger) : base(nettyConfig, channelInitializer,logger)
+                UDPChannelInitializer channelInitializer, ILogger<NettyUDPServer> logger) : base(nettyConfig, channelInitializer, logger)
         {
 
         }
@@ -32,7 +32,7 @@ namespace Coleseus.Shared.Server.Netty
 
         public override async Task startServer()
         {
-         
+
             try
             {
                 serverBootstrap = new Bootstrap();
@@ -45,6 +45,9 @@ namespace Coleseus.Shared.Server.Netty
                         serverBootstrap.Option(option, channelOptions[option]);
                     }
                 }
+                serverBootstrap.Option(ChannelOption.SoSndbuf, 65536);
+                serverBootstrap.Option(ChannelOption.SoRcvbuf, 65536);
+                serverBootstrap.Option(ChannelOption.SoBroadcast, true);
                 serverBootstrap.Group(nettyConfig.getBossGroup())
                                   .Channel<SocketDatagramChannel>()
                     .Handler(getChannelInitializer());

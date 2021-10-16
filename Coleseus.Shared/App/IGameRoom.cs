@@ -178,7 +178,7 @@ namespace Coleseus.Shared.App
 		 * all users connected to a game room.
 		 * 
 		 */
-        void close();
+        void Close();
 
         void setFactory(SessionFactory factory);
 

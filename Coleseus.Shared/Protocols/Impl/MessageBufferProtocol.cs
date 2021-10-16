@@ -2,11 +2,15 @@
 using Coleseus.Shared.Handlers.Netty;
 using Coleseus.Shared.Util;
 using DotNetty.Codecs;
+using DotNetty.Common.Internal.Logging;
+using DotNetty.Handlers.Logging;
 using DotNetty.Transport.Channels;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Console;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using Microsoft.Extensions.Configuration;
 
 namespace Coleseus.Shared.Protocols.Impl
 {
@@ -37,6 +41,8 @@ namespace Coleseus.Shared.Protocols.Impl
                     .getPipeLineOfConnection(playerSession);
             // Upstream handlers or encoders (i.e towards server) are added to
             // pipeline now.
+            
+            pipeline.AddLast(new LoggingHandler());
             pipeline.AddLast("lengthDecoder", createLengthBasedFrameDecoder());
             pipeline.AddLast("messageBufferEventDecoder", messageBufferEventDecoder);
             pipeline.AddLast("eventHandler", new DefaultToServerHandler(
@@ -45,7 +51,7 @@ namespace Coleseus.Shared.Protocols.Impl
             // Downstream handlers - Filter for data which flows from server to
             // client. Note that the last handler added is actually the first
             // handler for outgoing data.
-            pipeline.AddLast("lengthFieldPrepender", new LengthFieldPrepender(2,2));
+            pipeline.AddLast("lengthFieldPrepender", new LengthFieldPrepender(2,false));
             pipeline.AddLast("messageBufferEventEncoder", messageBufferEventEncoder);
 
         }

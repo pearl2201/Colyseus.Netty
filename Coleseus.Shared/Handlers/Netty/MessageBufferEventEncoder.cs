@@ -9,6 +9,11 @@ using System.Text;
 
 namespace Coleseus.Shared.Handlers.Netty
 {
+    public interface IDataBufferSchema
+    {
+        MessageBuffer<IByteBuffer> ToMessageBuffer();
+    }
+
     public class MessageBufferEventEncoder : MessageToMessageEncoder<IEvent>
     {
 
@@ -35,14 +40,24 @@ namespace Coleseus.Shared.Handlers.Netty
 
         {
             IByteBuffer msg = null;
+
             if (null != @event.getSource())
             {
+                //var source = @event.getSource();
+                //MessageBuffer<IByteBuffer> msgBuffer = null;
+                //if (source is IDataBufferSchema dataSchema)
+                //{
+                //    msgBuffer = dataSchema.ToMessageBuffer();
+                //}
+                //else
+                //{
+                //    msgBuffer = (MessageBuffer<IByteBuffer>)source;
+                //}
 
-
-                MessageBuffer<IByteBuffer> msgBuffer = (MessageBuffer<IByteBuffer>)@event.getSource();
-                IByteBuffer data = msgBuffer.getNativeBuffer();
+                IByteBuffer data = @event.getBufferData();
                 IByteBuffer opcode = ctx.Allocator.Buffer(1);
-                opcode.WriteByte(@event.getType());
+                var type = @event.getType();
+                opcode.WriteByte(type);
                 msg = Unpooled.WrappedBuffer(opcode, data);
             }
             else

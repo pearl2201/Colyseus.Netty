@@ -79,7 +79,7 @@ namespace Coleseus.Shared.Service.Impl
                     // handler already, hence another null check required.
                     if (sessions.TryRemove(reconnectKey, out ISession removeSession))
                     {
-                        removeSession.close();
+                        removeSession.Close();
                     }
 
                 }

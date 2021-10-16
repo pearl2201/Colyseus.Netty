@@ -18,7 +18,11 @@ namespace Coleseus.Shared.Service.Impl
 
         public ISession getSession(T key)
         {
-            return sessions[key];
+            if (sessions.TryGetValue(key, out var session))
+            {
+                return session;
+            }    
+            return null;
         }
 
 

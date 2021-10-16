@@ -22,7 +22,7 @@ namespace Coleseus.Shared.Handlers.Netty
 
         protected override void ChannelRead0(IChannelHandlerContext ctx, IEvent msg)
         {
-            playerSession.onEvent(msg);
+            playerSession.OnEvent(msg);
         }
 
 
@@ -30,19 +30,19 @@ namespace Coleseus.Shared.Handlers.Netty
         {
             _logger.Error("Exception during network communication: {}.", exception);
             IEvent @event = Events.CreateEvent(exception, Events.EXCEPTION);
-            playerSession.onEvent(@event);
+            playerSession.OnEvent(@event);
         }
 
 
         public override void ChannelInactive(IChannelHandlerContext ctx)
         {
             _logger.Debug("Netty Channel {} is closed.", ctx.Channel);
-            if (!playerSession.isShuttingDown)
+            if (!playerSession.IsShuttingDown)
             {
                 // Should not send close to session, since reconnection/other
                 // business logic might be in place.
                 IEvent @event = Events.CreateEvent(null, Events.DISCONNECT);
-                playerSession.onEvent(@event);
+                playerSession.OnEvent(@event);
             }
         }
 
@@ -56,7 +56,7 @@ namespace Coleseus.Shared.Handlers.Netty
                         ctx.Channel);
                 // TODO check if setting payload as non-throwable cause issue?
                 IEvent @event = Events.CreateEvent(evt, Events.EXCEPTION);
-                playerSession.onEvent(@event);
+                playerSession.OnEvent(@event);
             }
         }
 

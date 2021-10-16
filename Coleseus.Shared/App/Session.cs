@@ -18,22 +18,22 @@ namespace Coleseus.Shared.App
 	 */
 
 
-        Object getId();
+        Object GetId();
 
-        void setId(Object id);
+        void SetId(Object id);
 
-        void setAttribute(String key, Object value);
+        void SetAttribute(String key, Object value);
 
-        Object getAttribute(String key);
+        Object GetAttribute(String key);
 
-        void removeAttribute(String key);
+        void RemoveAttribute(String key);
 
-        void onEvent(IEvent @event);
+        void OnEvent(IEvent @event);
 
-        IEventDispatcher eventDispatcher { get; }
+        IEventDispatcher EventDispatcher { get; }
 
 
-        bool isWriteable { get; set; }
+        bool IsWriteable { get; set; }
 
         /**
 		 * A session would not have UDP capability when created. Depending on the
@@ -44,34 +44,30 @@ namespace Coleseus.Shared.App
 		 * @return Returns true if the a UDP {@link MessageSender} instance is
 		 *         attached to this session, else false.
 		 */
-        bool isUDPEnabled { get; set; }
+        bool IsUDPEnabled { get; set; }
 
-        bool isShuttingDown { get; }
+        bool IsShuttingDown { get; }
 
-        DateTime creationTime { get; }
+        DateTime CreationTime { get; }
 
-        DateTime lastReadWriteTime { get; }
+        DateTime LastReadWriteTime { get; }
 
-      
 
-        SessionStatus status { get; set; }
 
-        bool isConnected();
+        SessionStatus Status { get; set; }
 
-        void addHandler(IEventHandler eventHandler);
+        bool IsConnected();
 
-        void removeHandler(IEventHandler eventHandler);
+        void AddHandler(IEventHandler eventHandler);
 
-        List<IEventHandler> getEventHandlers(int eventType);
+        void RemoveHandler(IEventHandler eventHandler);
 
-        void close();
+        List<IEventHandler> GetEventHandlers(int eventType);
 
-        void setUdpSender(Fast udpSender);
+        void Close();
 
-        Fast getUdpSender();
+        Fast UdpSender { get; set; }
 
-        void setTcpSender(Reliable tcpSender);
-
-        Reliable getTcpSender();
+        Reliable TcpSender { get; set; }
     }
 }

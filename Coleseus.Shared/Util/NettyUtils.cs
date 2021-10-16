@@ -31,7 +31,7 @@ namespace Coleseus.Shared.Util
         public static IChannelPipeline getPipeLineOfConnection(
                 IPlayerSession playerSession)
         {
-            return getPipeLineOfConnection((NettyTCPMessageSender)playerSession.getTcpSender());
+            return getPipeLineOfConnection((NettyTCPMessageSender)playerSession.TcpSender);
         }
 
         /**

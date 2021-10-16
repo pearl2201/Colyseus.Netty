@@ -1,4 +1,5 @@
 ﻿using Coleseus.Shared.Communication;
+using DotNetty.Buffers;
 using System;
 using System.Collections.Generic;
 using System.Text;

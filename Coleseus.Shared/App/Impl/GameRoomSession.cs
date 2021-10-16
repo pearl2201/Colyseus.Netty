@@ -36,7 +36,7 @@ namespace Coleseus.Shared.App.Impl
             {
                 sessions = new HashSet<IPlayerSession>();
             }
-           
+
             if (null == stateManager)
             {
                 stateManager = new GameStateManager();
@@ -72,7 +72,7 @@ namespace Coleseus.Shared.App.Impl
             return this;
         }
 
-     
+
 
         public GameRoomSessionBuilder SetStateManager(
                 IGameStateManagerService gameStateManagerService)
@@ -121,7 +121,7 @@ namespace Coleseus.Shared.App.Impl
 
         protected SessionFactory sessionFactory;
 
-    
+
 
         private Mutex mute = new Mutex();
 
@@ -137,7 +137,7 @@ namespace Coleseus.Shared.App.Impl
             this._logger = Serilog.Log.ForContext<GameRoomSession>();
             if (null == gameRoomSessionBuilder.eventDispatcher)
             {
-                eventDispatcher = new ExecutorEventDispatcher();
+                EventDispatcher = new ExecutorEventDispatcher();
             }
         }
 
@@ -152,15 +152,22 @@ namespace Coleseus.Shared.App.Impl
                 Object state = manager.State;
                 if (null != state)
                 {
-                    playerSession.onEvent(Events.NetworkEvent(state));
+                    playerSession.OnEvent(CreateNetworkStateEvent(state));
                 }
             }
         }
+
+        public virtual IEvent CreateNetworkStateEvent(Object state)
+        {
+            return Events.EntireStateEvent(state, Communication.DeliveryGuaranty.RELIABLE);
+        }
+
+
         [MethodImpl(MethodImplOptions.Synchronized)]
         public bool disconnectSession(IPlayerSession playerSession)
 
         {
-            bool removeHandlers = this.eventDispatcher.removeHandlersForSession(playerSession);
+            bool removeHandlers = this.EventDispatcher.removeHandlersForSession(playerSession);
             //playerSession.getEventDispatcher().clear(); // remove network handlers of the session.
             return (removeHandlers && sessions.Remove(playerSession));
         }
@@ -168,23 +175,23 @@ namespace Coleseus.Shared.App.Impl
 
         public void send(Coleseus.Shared.Event.IEvent @event)
         {
-            onEvent(@event);
+            OnEvent(@event);
         }
 
 
         public void sendBroadcast(INetworkEvent networkEvent)
         {
-            onEvent(networkEvent);
+            OnEvent(networkEvent);
         }
 
 
-        public override void close()
+        public override void Close()
         {
             mute.WaitOne();
-            isShuttingDown = true;
+            IsShuttingDown = true;
             foreach (IPlayerSession session in sessions)
             {
-                session.close();
+                session.Close();
             }
             mute.ReleaseMutex();
         }
@@ -283,7 +290,7 @@ namespace Coleseus.Shared.App.Impl
             IEventHandler networkEventHandler = new NetworkEventListener(playerSession);
             // Add the handler to the game room's EventDispatcher so that it will
             // pass game room network events to player session session.
-            this.eventDispatcher.addHandler(networkEventHandler);
+            this.EventDispatcher.addHandler(networkEventHandler);
             _logger.Verbose("Added Network handler to "
                     + "EventDispatcher of GameRoom {}, for session: {}", this,
                     playerSession);
@@ -302,15 +309,15 @@ namespace Coleseus.Shared.App.Impl
         public bool connectSession(IPlayerSession playerSession)
 
         {
-            if (!isShuttingDown)
+            if (!IsShuttingDown)
             {
-                playerSession.status = (SessionStatus.CONNECTING);
+                playerSession.Status = (SessionStatus.CONNECTING);
                 sessions.Add(playerSession);
                 playerSession.setGameRoom(this);
                 _logger.Verbose("Protocol to be applied is: {}", protocol.GetType().Name);
                 protocol.applyProtocol(playerSession, true);
                 createAndAddEventHandlers(playerSession);
-                playerSession.status = (SessionStatus.CONNECTED);
+                playerSession.Status = (SessionStatus.CONNECTED);
                 afterSessionConnect(playerSession);
                 return true;
                 // TODO send event to all other sessions?

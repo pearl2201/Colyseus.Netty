@@ -1,4 +1,7 @@
-﻿using System;
+﻿using Coleseus.Shared.Communication;
+using DotNetty.Buffers;
+using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -29,5 +32,16 @@ namespace Colyseus.NettyServer.LostDecade
 
         public const string MONSTER = "MONSTER";
         public const string HERO = "HERO";
+
+        public MessageBuffer<IByteBuffer> ToMessageBuffer(MessageBuffer<IByteBuffer> messageBuffer)
+        {
+            messageBuffer.writeString(JsonConvert.SerializeObject(this));
+            return messageBuffer;
+        }
+
+        public static Entity FromMessageBuffer(MessageBuffer<IByteBuffer> messageBuffer)
+        {
+            return JsonConvert.DeserializeObject<Entity>(messageBuffer.readString());
+        }
     }
 }
