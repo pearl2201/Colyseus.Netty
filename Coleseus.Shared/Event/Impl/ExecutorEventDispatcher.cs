@@ -157,7 +157,7 @@ namespace Coleseus.Shared.Event.Impl
             {
                 Task.Run(() =>
                 {
-                    foreach (IEventHandler handler in genericHandlers)
+                    foreach (IEventHandler handler in genericHandlers.ToArray())
                     {
                         handler.onEvent(@event);
                     }

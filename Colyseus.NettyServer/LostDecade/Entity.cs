@@ -13,8 +13,9 @@ namespace Colyseus.NettyServer.LostDecade
     {
         public String Id { get; set; }
 
-        public int X { get; set; }
-        public int Y { get; set; }
+        public string PlayerId { get; set; }
+        public float X { get; set; }
+        public float Y { get; set; }
         public int Speed { get; set; }
         public int Key { get; set; }
 

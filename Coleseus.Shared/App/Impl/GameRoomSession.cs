@@ -315,6 +315,8 @@ namespace Coleseus.Shared.App.Impl
                 sessions.Add(playerSession);
                 playerSession.setGameRoom(this);
                 _logger.Verbose("Protocol to be applied is: {}", protocol.GetType().Name);
+
+                ///////////////////
                 protocol.applyProtocol(playerSession, true);
                 createAndAddEventHandlers(playerSession);
                 playerSession.Status = (SessionStatus.CONNECTED);

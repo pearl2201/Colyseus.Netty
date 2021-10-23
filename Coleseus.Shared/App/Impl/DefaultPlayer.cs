@@ -33,6 +33,7 @@ namespace Coleseus.Shared.App.Impl
 
         public DefaultPlayer()
         {
+            id = Guid.NewGuid();
             playerSessions = new HashSet<IPlayerSession>();
         }
 

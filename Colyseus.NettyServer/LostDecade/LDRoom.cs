@@ -29,10 +29,10 @@ namespace Colyseus.NettyServer.LostDecade
             playerSession.AddHandler(new LDRoomPlayerSessionHandler(playerSession));
 
             Entity hero = createHero(playerSession);
+            hero.PlayerId = playerSession.getPlayer().getId().ToString();
             LDGameState state = (LDGameState)getStateManager().State;
             state.Entities.Add(hero);
-            var buffer = new LDGameState(state.Entities,
-                state.Monster, hero);
+            var buffer = new LDGameState(state.Entities);
 
             sendBroadcast(Events.EntireStateEvent(buffer));
 
@@ -42,13 +42,14 @@ namespace Colyseus.NettyServer.LostDecade
 
         private Entity createHero(IPlayerSession playerSession)
         {
+            Random r = new Random();
             Entity hero = new Entity()
             {
                 Id = (string)playerSession.GetId(),
                 Score = 0,
                 Type = Entity.HERO,
-                Y = canvasHeight / 2,
-                X = canvasWidth / 2,
+                Y = 0,
+                X = 0,
                 Speed = 256
             };
             return hero;
@@ -97,7 +98,7 @@ namespace Colyseus.NettyServer.LostDecade
 
         public class GameSessionHandler : SessionMessageHandler
         {
-            private Entity monster;
+
             private GameRoom room;
             public GameSessionHandler(GameRoomSession session) : base(session)
             {
@@ -107,43 +108,47 @@ namespace Colyseus.NettyServer.LostDecade
 
                 state = new LDGameState();
                 state.Entities = (new HashSet<Entity>());
-                state.Monster = LDRoom.createMonster();
+
                 manager.State = (state); // set it back on the room
-                this.monster = state.Monster;
             }
             public override void onEvent(IEvent @event)
             {
-                Entity hero = ((LDGameState)@event.getSource()).Hero;
-                ISession session = @event.getEventContext().getSession();
-                update(hero, session);
+                NettyMessageBuffer buffer = (NettyMessageBuffer)@event.getSource();
+                var sourceId = buffer.readUnsignedShort();
+                if (sourceId == 0)
+                {
+                    Console.WriteLine("Unknow message: " + sourceId);
+                }
+                else if (sourceId == 2)
+                {
+                    var id = (string)@event.getEventContext().getSession().GetId();
+                    var updateCmd = LDUpdateHeroPositionEvent.FromMessageBuffer(buffer);
+                    IGameStateManagerService manager = room.getStateManager();
+                    LDGameState state = (LDGameState)manager.State;
+                    var entity = state.Entities.FirstOrDefault(x => x.Id == id);
+                    entity.X = updateCmd.X;
+                    entity.Y = updateCmd.Y;
+                    manager.State = state;
+                    room.sendBroadcast(Events.EntireStateEvent(state, DeliveryGuaranty.RELIABLE));
+                }
             }
 
             private void update(Entity hero, ISession session)
             {
-                bool isTouching = (hero.X <= monster.Y + 32)
-                        && (hero.Y <= monster.Y + 32)
-                        && (monster.X <= hero.Y + 32)
-                        && (monster.Y <= hero.Y + 32);
+                //bool isTouching = (hero.X <= monster.Y + 32)
+                //        && (hero.Y <= monster.Y + 32)
+                //        && (monster.X <= hero.Y + 32)
+                //        && (monster.Y <= hero.Y + 32);
 
-                LDGameState state = (LDGameState)room.getStateManager().State;
-                hero.Id = ((String)session.GetId());
-                if (isTouching)
-                {
-                    hero.Score += 1;
-                    state.AddEntitiy(hero);
-                    Reset();
-                }
-                else
-                {
-                    state.AddEntitiy(hero);
-                }
+                //LDGameState state = (LDGameState)room.getStateManager().State;
+                //hero.Id = ((String)session.GetId());
+
 
                 // The state of only one hero is updated, no need to send every
                 // hero's state.
                 // A possible optimization here is not to broadcast state in case
                 // the hero has not moved.
-                room.sendBroadcast(Events.EntireStateEvent(new LDGameState(null,
-                        monster, hero),DeliveryGuaranty.RELIABLE));
+                room.sendBroadcast(Events.EntireStateEvent(new LDGameState(null), DeliveryGuaranty.RELIABLE));
             }
 
             /**
@@ -163,10 +168,9 @@ namespace Colyseus.NettyServer.LostDecade
                     entity.Y = (canvasHeight / 2);
                     entity.X = (canvasWidth / 2);
                 }
-                monster.Y = (getRandomPos(canvasWidth));
-                monster.X = (getRandomPos(canvasHeight));
+
                 // no need to send the entities here since client will do resetting on its own.
-                LDGameState ldGameState = new LDGameState(null, monster, null);
+                LDGameState ldGameState = new LDGameState(null);
                 ldGameState.Reset = (true);
                 room.sendBroadcast(Events.EntireStateEvent(ldGameState));
             }

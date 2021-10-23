@@ -67,7 +67,7 @@ namespace Coleseus.Shared.Event.Impl
                     onStart(@event);
                     break;
                 case Events.STOP:
-                    onStart(@event);
+                    onStop(@event);
                     break;
                 case Events.CONNECT_FAILED:
                     onConnectFailed(@event);

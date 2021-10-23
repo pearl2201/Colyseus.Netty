@@ -200,7 +200,7 @@ namespace Coleseus.Shared.Handlers.Netty
                 playerSession.SetAttribute(ColyseusConfig.RECONNECT_REGISTRY, reconnectRegistry);
                 _logger.Debug("Sending GAME_ROOM_JOIN_SUCCESS to channel {}", channel);
                 IByteBuffer reconnectKeyBuffer = Unpooled.WrappedBuffer(NettyUtils.createBufferForOpcode(Events.GAME_ROOM_JOIN_SUCCESS),
-                                NettyUtils.WriteString(reconnectKey));
+                                NettyUtils.WriteString(reconnectKey), NettyUtils.WriteString((string)playerSession.GetId()));
                 Task future = channel.WriteAndFlushAsync(reconnectKeyBuffer);
                 connectToGameRoom(gameRoom, playerSession, future, channel);
                 loginUdp(playerSession, buffer);

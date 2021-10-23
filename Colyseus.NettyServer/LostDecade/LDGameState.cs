@@ -14,8 +14,6 @@ namespace Colyseus.NettyServer.LostDecade
     {
         public const string HASH_CODE = "LDGameState";
         public HashSet<Entity> Entities { get; set; }
-        public Entity Monster { get; set; }
-        public Entity Hero { get; set; }
         public bool Reset { get; set; }
 
         public LDGameState()
@@ -24,12 +22,10 @@ namespace Colyseus.NettyServer.LostDecade
         }
 
 
-        public LDGameState(HashSet<Entity> entities, Entity monster, Entity hero)
+        public LDGameState(HashSet<Entity> entities)
         {
 
             this.Entities = entities;
-            this.Monster = monster;
-            this.Hero = hero;
         }
 
         public void AddEntitiy(Entity hero)
